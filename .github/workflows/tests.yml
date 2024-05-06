@@ -1,0 +1,39 @@
+#nazywamy nasz work flow będzie to nazwa wyświetlana na github
+name: Tests
+
+#określamy event który trigeruje wykonanie work flow
+#w tym przypadku będzie się on uruchamiał  dla każdego pusha na branch main
+on:
+  push:
+#określamy joby wykonywane dla takiego workflow
+jobs:
+  # nazwa joba
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # określamy maszynę, na której ma być uruchamiany dany job
+        os: [ ubuntu-latest, windows-latest ]
+        # określamy wersję pythona do sprawdzenia
+        python-version: [ '3.9', '3.10' ]
+
+    steps:
+      # github actions umożliwiają nam między innymi dostęp do plików z repozytorium na wybranej maszynie
+      - uses: actions/checkout@v4
+        # name określa nazwę stepa
+        # github actions przyśpieszają konfiguracje podstawowych kroków w tym przypadku instalację wirtualnego środowiska
+        # uses pozwala nam wybrać akcję. Jest to w rzeczywistości link do repozytorium z daną akcją : https://github.com/actions/checkout
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        # po polu with: podajemy argumenty danej akcji
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        # run pozwala nam wpisywać polecenia, które wykonają się w konsoli
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox tox-gh-actions
+        # workingdirectory określa lokalizację w której wykonujemy dane polecenie
+        # working-directory: cośtam
+      - name: Test with tox
+        run: tox
