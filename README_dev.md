@@ -16,6 +16,13 @@ PyCharm automatycznie aktywuje wirtualne środowisko po uruchomieniu konsoli
 (można rozpoznać to po tym, że linijka zaczyna się od słowa `(venv)`). 
 Jeśli nie, należy to zrobić ręcznie poprzez wykonanie skryptu `venv/Scripts/activate`.
 
+## Instalacja w trybie edycji
+
+Aby stworzyć link (symlink) do aktualnego katalogu z kodem źródłowym, należy wykonać:
+```
+pip install -e .
+```
+
 ## Instalacja pakietów dla deweloperów
 
 W już aktywowanej konsoli należy wpisać komendę `pip install -r ./requirements_dev.txt`. 
@@ -25,9 +32,15 @@ która wyświetli listę zainstalowanych pakietów.
 ## Lokalne komendy
 
 Projekt zawiera zestaw narzędzi wspomagających rozwój oprogramowania, które można wywoływać:
-- `mypy src`,
-- `pytest`, 
-- `tox`.
+```
+mypy src
+```
+```
+pytest
+```
+```
+tox
+```
 
 ## Współpraca repozytorium z Jirą
 
