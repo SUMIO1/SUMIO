@@ -1,9 +1,33 @@
 from tkinter import filedialog, messagebox
+from config import constraints
 
 import pandas as pd
 
-required_columns = ['name', 'surname', 'age_category', 'weight', 'country', 'image_url']
 df = None
+
+
+def validateCSV(df):
+
+    # Check if all required columns are present
+    if not all(col in df.columns for col in constraints['required_columns']):
+        raise ValueError(f"Columns {constraints['required_columns']} are missing in the CSV file.")
+
+    for index, row in df.iterrows():
+
+        # Check if age category is valid
+        if row['age_category'] not in constraints['age_categories']:
+            raise ValueError(f"Invalid age category {row['age_category']} at row {index + 1}")
+
+        # Check if weight category is valid
+        if row['weight_category'] not in constraints['age_categories'][row['age_category']]:
+            raise ValueError(f"Invalid weight category {row['weight_category']} at row {index + 1}")
+
+        # Check if weight is within the valid range
+        weight = row['weight']
+        min_weight = constraints['age_categories'][row['age_category']][row['weight_category']]['min']
+        max_weight = constraints['age_categories'][row['age_category']][row['weight_category']]['max']
+        if weight < min_weight or weight > max_weight:
+            raise ValueError(f"Weight {weight} is not within the valid range at row {index + 1}")
 
 
 def processCSV(df):
@@ -17,8 +41,7 @@ def readCSV():
     try:
         global df
         df = pd.read_csv(file_path)
-        if not all(col in df.columns for col in required_columns):
-            raise ValueError(f"Columns {required_columns} are missing in the CSV file.")
+        validateCSV(df)
         processCSV(df)
 
     except ValueError as e:
