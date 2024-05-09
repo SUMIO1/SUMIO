@@ -1,0 +1,115 @@
+<MainScreen>:
+    orientation: 'horizontal'
+    padding: 40
+    spacing: 40
+    canvas.before:
+        Color:
+            rgba: 0.925, 0.925, 0.925, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    Menu:
+        id: menu
+    Content:
+        id: content
+
+<Menu>:
+    orientation: 'vertical'
+    size_hint_x: 0.3
+    MenuItem:
+        text1: 'Quick Start'
+        text2: 'Instructions on how to quickly start using the app.'
+    MenuItem:
+        text1: 'Load CSV file'
+        text2: 'Upload a CSV file containing participant data.'
+    MenuItem:
+        text1: 'Show participants'
+        text2: 'View the list of all registered participants.'
+    MenuItem:
+        text1: 'Bracket'
+        text2: 'Generate or display the tournament bracket.'
+
+    Label:
+
+<MenuItem>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: 120
+    padding: 20
+    spacing: 15
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+        Color:
+            rgba: 0.87, 0.87, 0.87, 1
+        Line:
+            width: 0.5
+            rectangle: self.x, self.y, self.width, self.height
+    Label:
+        id: label1
+        text: root.text1
+        font_size: 20
+        color: 0.1294, 0.1294, 0.1294, 1
+        text_size: self.width, None
+        halign: 'left'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    Label:
+        id: label2
+        text: root.text2
+        font_size: 16
+        color: 0.1294, 0.1294, 0.1294, 1
+        text_size: self.width, None
+        halign: 'left'
+        size_hint_y: None
+        height: self.texture_size[1]
+
+<Content>:
+    size_hint_x: 0.7
+
+    canvas.before:
+        Color:
+            rgba: 0.2, 0.4, 0.5, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+    BoxLayout:
+        id: content_box
+        orientation: 'vertical'
+
+<QuickStart>:
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.2, 0.1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<LoadCSV>:
+    canvas.before:
+        Color:
+            rgba: 0.1, 0.2, 0.5, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<ShowParticipants>:
+    canvas.before:
+        Color:
+            rgba: 0.5, 0.1, 0.9, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<Bracket>:
+    canvas.before:
+        Color:
+            rgba: 0.9, 0.5, 0.1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
