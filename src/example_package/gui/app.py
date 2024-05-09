@@ -3,7 +3,7 @@ from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
 
 
-class SimpleApp(App):
+class SumioApp(App):
     kv_file = './kivy/app.kv'
 
     def build(self):
@@ -67,4 +67,4 @@ class Bracket(BoxLayout):
 
 
 if __name__ == "__main__":
-    SimpleApp().run()
+    SumioApp().run()

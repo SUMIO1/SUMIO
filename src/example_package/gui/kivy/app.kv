@@ -90,6 +90,66 @@
             size: self.size
             pos: self.pos
 
+    orientation: 'vertical'
+    padding: 20
+
+    Label:
+        text: 'Quick Start'
+        font_size: 30
+        color: 1, 1, 1, 1
+        size_hint_y: None
+        height: 50
+        text_size: self.width, None
+        halign: 'left'
+
+    Label:
+        text: 'Welcome to the Sumo Tournament Manager app'
+        text_size: self.width, None
+        halign: 'left'
+
+    Label:
+        text: 'To get started, follow these steps:'
+        text_size: self.width, None
+        halign: 'left'
+
+
+    Label:
+        text: '1. Load a CSV file with participant data'
+        text_size: self.width, None
+        halign: 'left'
+
+    Label:
+        text: '2. Weight participants and make adjustments if necessary'
+        text_size: self.width, None
+        halign: 'left'
+
+    Label:
+        text: '3. Select tournament participants'
+        text_size: self.width, None
+        halign: 'left'
+
+    Label:
+        text: '4. Generate the tournament bracket with chosen participants'
+        text_size: self.width, None
+        halign: 'left'
+
+    Label:
+        text: '5. Commence the tournament'
+        text_size: self.width, None
+        halign: 'left'
+
+    Label:
+        text: '6. Continuously update the bracket as the tournament progresses'
+        text_size: self.width, None
+        halign: 'left'
+
+    Label:
+        text: 'We wish you a successful tournament!'
+        text_size: self.width, None
+        halign: 'left'
+
+
+
 <LoadCSV>:
     canvas.before:
         Color:
