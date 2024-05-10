@@ -2,7 +2,6 @@ from kivy.app import App
 from kivy.metrics import dp
 from kivy.properties import StringProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
@@ -92,7 +91,6 @@ class ShowParticipants(ScrollView):
     def add_participant_labels(self, layout, participant):
         for label_name in self.participants_data.columns[:-1]:
             layout.add_widget(Label(text=str(participant[label_name]), font_size=12, color=(0.1294, 0.1294, 0.1294, 1)))
-
 
     def print_participant(self, instance):
         index = instance.parent.children.index(instance)
