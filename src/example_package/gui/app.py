@@ -72,30 +72,27 @@ class ShowParticipants(ScrollView):
     def __init__(self, **kwargs):
         super(ShowParticipants, self).__init__(**kwargs)
         self.participants_data = pd.read_csv('sample.csv')
+        self.generate_layout()
 
-        # layout = GridLayout(cols=8, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
+    def generate_layout(self):
+
         layout = GridLayout(cols=7, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
 
-        # headers = ['Name', 'Surname', 'Age Category', 'Age', 'Weight Category', 'Weight', 'Country', '']
         headers = ['Name', 'Surname', 'Age Category', 'Age', 'Weight Category', 'Weight', 'Country']
+
         for header in headers:
-            layout.add_widget(Label(text=header, bold=True, font_size=14))
+            layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
 
         for index, participant in self.participants_data.iterrows():
-            layout.add_widget(Label(text=str(participant['name']), font_size=12))
-            layout.add_widget(Label(text=str(participant['surname']), font_size=12))
-            layout.add_widget(Label(text=str(participant['age_category']), font_size=12))
-            layout.add_widget(Label(text=str(participant['age']), font_size=12))
-            layout.add_widget(Label(text=str(participant['weight_category']), font_size=12))
-            layout.add_widget(Label(text=str(participant['weight']), font_size=12))
-            layout.add_widget(Label(text=str(participant['country']), font_size=12))
-
-            # add_button = Button(text="Add", size_hint=(None, None), size=(dp(40), dp(20)))
-            # add_button.bind(on_release=self.print_participant)
-            # layout.add_widget(add_button)
+            self.add_participant_labels(layout, participant)
 
         self.add_widget(layout)
+
+    def add_participant_labels(self, layout, participant):
+        for label_name in self.participants_data.columns[:-1]:
+            layout.add_widget(Label(text=str(participant[label_name]), font_size=12, color=(0.1294, 0.1294, 0.1294, 1)))
+
 
     def print_participant(self, instance):
         index = instance.parent.children.index(instance)
