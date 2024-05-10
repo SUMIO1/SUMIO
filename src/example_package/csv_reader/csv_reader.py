@@ -1,5 +1,5 @@
 from tkinter import filedialog, messagebox
-from config import constraints
+from config import CONSTRAINTS as constraints
 
 import pandas as pd
 
@@ -26,7 +26,7 @@ def validateCSV(df):
         weight = row['weight']
         min_weight = constraints['age_categories'][row['age_category']][row['weight_category']]['min']
         max_weight = constraints['age_categories'][row['age_category']][row['weight_category']]['max']
-        if weight < min_weight or weight > max_weight:
+        if not (min_weight <= weight <= max_weight):
             raise ValueError(f"Weight {weight} is not within the valid range at row {index + 1}")
 
 

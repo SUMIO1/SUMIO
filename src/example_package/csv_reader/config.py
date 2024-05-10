@@ -1,4 +1,7 @@
-constraints = {
+from typing import Final
+
+
+CONSTRAINTS: Final[dict] = {
     "required_columns": ['name', 'surname', 'age_category', 'age', 'weight_category', 'weight', 'country', 'image_url'],
     "age_categories": {
         "Jr. Men": {
