@@ -1,3 +1,6 @@
 # an example
 # a_package_we_need==68.2.0
 # or you can just do pip freeze > ./requirements.txt to populate the requirements.txt file
+
+pandas~=2.2.2
+setuptools~=57.4.0
