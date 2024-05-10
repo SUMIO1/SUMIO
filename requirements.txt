@@ -3,3 +3,6 @@
 # or you can just do pip freeze > ./requirements.txt to populate the requirements.txt file
 
 kivy==2.3.0
+pandas~=2.2.2
+setuptools~=57.4.0
+
