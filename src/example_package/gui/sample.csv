@@ -1,0 +1,41 @@
+name,surname,age_category,age,weight_category,weight,country,image_url
+John,Doe,Jr. Men,16,Light-weight,70,USA,https://example.com/john_doe.jpg
+Alice,Smith,Jr. Men,17,Middle-weight,90,Canada,https://example.com/alice_smith.jpg
+Michael,Johnson,Jr. Men,15,Light-weight,75,UK,https://example.com/michael_johnson.jpg
+Emma,Brown,Jr. Men,14,Heavy-weight,110,USA,https://example.com/emma_brown.jpg
+James,Williams,Jr. Men,18,Middle-weight,85,Canada,https://example.com/james_williams.jpg
+Olivia,Jones,Jr. Men,16,Heavy-weight,105,UK,https://example.com/olivia_jones.jpg
+William,Anderson,Jr. Men,17,Light-weight,68,USA,https://example.com/william_anderson.jpg
+Sophia,Davis,Jr. Men,15,Middle-weight,95,Canada,https://example.com/sophia_davis.jpg
+Daniel,Martinez,Jr. Men,14,Light-weight,72,UK,https://example.com/daniel_martinez.jpg
+Isabella,Garcia,Jr. Men,16,Heavy-weight,112,USA,https://example.com/isabella_garcia.jpg
+John,Doe,Jr. Women,16,Light-weight,55,USA,https://example.com/john_doe.jpg
+Alice,Smith,Jr. Women,17,Middle-weight,70,Canada,https://example.com/alice_smith.jpg
+Michael,Johnson,Jr. Women,15,Light-weight,58,UK,https://example.com/michael_johnson.jpg
+Emma,Brown,Jr. Women,14,Heavy-weight,85,USA,https://example.com/emma_brown.jpg
+James,Williams,Jr. Women,18,Middle-weight,68,Canada,https://example.com/james_williams.jpg
+Olivia,Jones,Jr. Women,16,Heavy-weight,80,UK,https://example.com/olivia_jones.jpg
+William,Anderson,Jr. Women,17,Light-weight,52,USA,https://example.com/william_anderson.jpg
+Sophia,Davis,Jr. Women,15,Middle-weight,65,Canada,https://example.com/sophia_davis.jpg
+Daniel,Martinez,Jr. Women,14,Light-weight,56,UK,https://example.com/daniel_martinez.jpg
+Isabella,Garcia,Jr. Women,16,Heavy-weight,78,USA,https://example.com/isabella_garcia.jpg
+John,Doe,Men,25,Light-weight,80,USA,https://example.com/john_doe.jpg
+Alice,Smith,Men,27,Middle-weight,100,Canada,https://example.com/alice_smith.jpg
+Michael,Johnson,Men,24,Light-weight,85,UK,https://example.com/michael_johnson.jpg
+Emma,Brown,Men,23,Heavy-weight,115,USA,https://example.com/emma_brown.jpg
+James,Williams,Men,28,Middle-weight,90,Canada,https://example.com/james_williams.jpg
+Olivia,Jones,Men,26,Heavy-weight,120,UK,https://example.com/olivia_jones.jpg
+William,Anderson,Men,27,Light-weight,78,USA,https://example.com/william_anderson.jpg
+Sophia,Davis,Men,25,Middle-weight,95,Canada,https://example.com/sophia_davis.jpg
+Daniel,Martinez,Men,24,Light-weight,82,UK,https://example.com/daniel_martinez.jpg
+Isabella,Garcia,Men,26,Heavy-weight,125,USA,https://example.com/isabella_garcia.jpg
+John,Doe,Women,23,Light-weight,60,USA,https://example.com/john_doe.jpg
+Alice,Smith,Women,24,Middle-weight,73,Canada,https://example.com/alice_smith.jpg
+Michael,Johnson,Women,22,Light-weight,65,UK,https://example.com/michael_johnson.jpg
+Emma,Brown,Women,21,Heavy-weight,80,USA,https://example.com/emma_brown.jpg
+James,Williams,Women,25,Middle-weight,70,Canada,https://example.com/james_williams.jpg
+Olivia,Jones,Women,23,Heavy-weight,85,UK,https://example.com/olivia_jones.jpg
+William,Anderson,Women,24,Light-weight,58,USA,https://example.com/william_anderson.jpg
+Sophia,Davis,Women,22,Middle-weight,68,Canada,https://example.com/sophia_davis.jpg
+Daniel,Martinez,Women,21,Light-weight,62,UK,https://example.com/daniel_martinez.jpg
+Isabella,Garcia,Women,23,Heavy-weight,82,USA,https://example.com/isabella_garcia.jpg
