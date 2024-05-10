@@ -1,6 +1,5 @@
 from tkinter import filedialog, messagebox
 from config import CONSTRAINTS as constraints
-
 import pandas as pd
 
 df = None
