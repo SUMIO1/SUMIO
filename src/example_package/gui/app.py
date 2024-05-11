@@ -1,6 +1,7 @@
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.properties import StringProperty
+from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
@@ -14,13 +15,14 @@ from config.constraints import CONSTRAINTS
 
 import logging
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class SumioApp(App):
     kv_file = 'kivy/app.kv'
 
     def build(self):
+        Window.maximize()
         return MainScreen()
 
 
@@ -96,7 +98,7 @@ class ShowParticipants(ScrollView):
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
 
         self.put_search_filters(layout)
-        for index, participant in self.filtered_data.iterrows():
+        for _, participant in self.filtered_data.iterrows():
             self.add_participant_labels(layout, participant)
 
         self.add_widget(layout)
@@ -138,25 +140,23 @@ class ShowParticipants(ScrollView):
                         sliders.append(widget.value)
         
         text_inputs = text_inputs[::-1]
-        # logging.debug(f"sasasa {text_inputs}")
-        # logging.debug(f"sasasa sliders {sliders}")
 
         weight_filter = int(sliders[0])
         age_filter = int(sliders[1])
+        logging.info(f"Applied weight filter: {weight_filter}")
+        logging.info(f"Applied age filter: {age_filter}")
         self.filtered_data = self.participants_data.loc[
             (self.participants_data['age'].between(0, age_filter)) &
             (self.participants_data['weight'].between(0, weight_filter))
         ]
 
         text_filters = [text.strip() for text in text_inputs]
-        # logging.debug(f"sasasa text filters {text_filters}")
+        logging.info(f"Applied text filters: {text_filters}")
         for i, text in enumerate(text_filters):
             if text:
                 self.filtered_data = self.filtered_data.loc[
                     (self.participants_data[self.text_filter_keys[i]].str.lower() == text.lower())
                 ]
-
-        # logging.debug(f"Filtered data age {self.filtered_data['age']}")
 
         self.clear_widgets()
         self.generate_layout()
