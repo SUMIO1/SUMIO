@@ -1,11 +1,12 @@
 from src.config.constraints import CONSTRAINTS
 from tkinter import filedialog, messagebox
 import pandas as pd
+from pandas import DataFrame
 
 df = None
 
 
-def validateCSV(df):
+def validateCSV(df: DataFrame):
 
     # Check if all required columns are present
     if not all(col in df.columns for col in CONSTRAINTS['required_columns']):
@@ -29,7 +30,7 @@ def validateCSV(df):
             raise ValueError(f"Weight {weight} is not within the valid range at row {index + 1}")
 
 
-def processCSV(df):
+def processCSV(df: DataFrame):
     print(df.head())
 
 

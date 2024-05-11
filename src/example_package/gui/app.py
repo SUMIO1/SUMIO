@@ -11,7 +11,7 @@ from src.config.constraints import CONSTRAINTS
 
 
 class SumioApp(App):
-    kv_file = './kivy/app.kv'
+    kv_file = 'kivy/app.kv'
 
     def build(self):
         return MainScreen()
@@ -32,7 +32,7 @@ class MainScreen(BoxLayout):
             csv_reader.readCSV()
         elif item == 'Show participants':
             if csv_reader.df is None:
-                messagebox.showerror("Error", "No data to show")
+                messagebox.showerror("Error", "No data to show. Please load a CSV file.")
                 return
             content.add_widget(ShowParticipants(csv_reader.df))
         elif item == 'Bracket':
