@@ -5,8 +5,9 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
-
-import pandas as pd
+from tkinter import messagebox
+from src.example_package.csv_reader import csv_reader
+from src.config.constraints import CONSTRAINTS
 
 
 class SumioApp(App):
@@ -28,9 +29,12 @@ class MainScreen(BoxLayout):
         if item == 'Quick Start':
             content.add_widget(QuickStart())
         elif item == 'Load CSV file':
-            content.add_widget(LoadCSV())
+            csv_reader.readCSV()
         elif item == 'Show participants':
-            content.add_widget(ShowParticipants())
+            if csv_reader.df is None:
+                messagebox.showerror("Error", "No data to show")
+                return
+            content.add_widget(ShowParticipants(csv_reader.df))
         elif item == 'Bracket':
             content.add_widget(Bracket())
 
@@ -68,9 +72,9 @@ class LoadCSV(BoxLayout):
 
 class ShowParticipants(ScrollView):
 
-    def __init__(self, **kwargs):
+    def __init__(self, participants_data, **kwargs):
         super(ShowParticipants, self).__init__(**kwargs)
-        self.participants_data = pd.read_csv('sample.csv')
+        self.participants_data = participants_data
         self.generate_layout()
 
     def generate_layout(self):
@@ -78,7 +82,7 @@ class ShowParticipants(ScrollView):
         layout = GridLayout(cols=7, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
 
-        headers = ['Name', 'Surname', 'Age Category', 'Age', 'Weight Category', 'Weight', 'Country']
+        headers = [header.replace('_', ' ').title() for header in CONSTRAINTS["required_columns"][:-1]]
 
         for header in headers:
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
