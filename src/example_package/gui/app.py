@@ -5,9 +5,16 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.slider import Slider
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
 from tkinter import messagebox
-from src.example_package.csv_reader import csv_reader
-from src.config.constraints import CONSTRAINTS
+from example_package.csv_reader import csv_reader
+from config.constraints import CONSTRAINTS
+
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class SumioApp(App):
@@ -68,38 +75,91 @@ class LoadCSV(BoxLayout):
     pass
 
 
-# name,surname,age_category,age,weight_category,weight,country,image_url
-
 class ShowParticipants(ScrollView):
 
     def __init__(self, participants_data, **kwargs):
         super(ShowParticipants, self).__init__(**kwargs)
         self.participants_data = participants_data
+        self.filtered_data = participants_data
+        self.age_filter_range = (0, 100)
+        self.weight_filter_range = (0, 200)
         self.generate_layout()
 
     def generate_layout(self):
-
         layout = GridLayout(cols=7, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
+        self.text_filter_keys = CONSTRAINTS["required_columns"][:-1]
+        self.headers = [header.replace('_', ' ').title() for header in self.text_filter_keys]
 
-        headers = [header.replace('_', ' ').title() for header in CONSTRAINTS["required_columns"][:-1]]
-
-        for header in headers:
+        self.put_search_button(layout)
+        for header in self.headers:
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
 
-        for index, participant in self.participants_data.iterrows():
+        self.put_search_filters(layout)
+        for index, participant in self.filtered_data.iterrows():
             self.add_participant_labels(layout, participant)
 
         self.add_widget(layout)
 
+    def put_search_button(self, layout):
+        n_grid = len(self.headers)
+        for i in range(n_grid-1):
+            if i == n_grid // 2:
+                layout.add_widget(Button(text="Search", on_release=self.apply_filters))
+            layout.add_widget(Label())
+
+    def put_search_filters(self, layout):
+        layout.add_widget(TextInput(hint_text="Filter Name", on_text_validate=self.apply_filters))
+        layout.add_widget(TextInput(hint_text="Filter Surname", on_text_validate=self.apply_filters))
+        layout.add_widget(TextInput(hint_text="Filter Age Category", on_text_validate=self.apply_filters))
+        layout.add_widget(Slider(min=0, max=100, value=self.age_filter_range[1], on_value=self.apply_filters))
+        layout.add_widget(TextInput(hint_text="Filter Weight Category", on_text_validate=self.apply_filters))
+        layout.add_widget(Slider(min=0, max=200, value=self.weight_filter_range[1], on_value=self.apply_filters))
+        layout.add_widget(TextInput(hint_text="Filter Country", on_text_validate=self.apply_filters))
+
     def add_participant_labels(self, layout, participant):
-        for label_name in self.participants_data.columns[:-1]:
+        for label_name in self.filtered_data.columns[:-1]:
             layout.add_widget(Label(text=str(participant[label_name]), font_size=12, color=(0.1294, 0.1294, 0.1294, 1)))
 
     def print_participant(self, instance):
         index = instance.parent.children.index(instance)
-        participant = self.participants_data.iloc[index // 8]
+        participant = self.filtered_data.iloc[index // 8]
         print(participant)
+
+    def apply_filters(self, *args):
+        text_inputs = []
+        sliders = []
+        for child in self.children:
+            if isinstance(child, GridLayout):
+                for widget in child.children:
+                    if isinstance(widget, TextInput):
+                        text_inputs.append(widget.text)
+                    elif isinstance(widget, Slider):
+                        sliders.append(widget.value)
+        
+        text_inputs = text_inputs[::-1]
+        # logging.debug(f"sasasa {text_inputs}")
+        # logging.debug(f"sasasa sliders {sliders}")
+
+        weight_filter = int(sliders[0])
+        age_filter = int(sliders[1])
+        self.filtered_data = self.participants_data.loc[
+            (self.participants_data['age'].between(0, age_filter)) &
+            (self.participants_data['weight'].between(0, weight_filter))
+        ]
+
+        text_filters = [text.strip() for text in text_inputs]
+        # logging.debug(f"sasasa text filters {text_filters}")
+        for i, text in enumerate(text_filters):
+            if text:
+                self.filtered_data = self.filtered_data.loc[
+                    (self.participants_data[self.text_filter_keys[i]].str.lower() == text.lower())
+                ]
+
+        # logging.debug(f"Filtered data age {self.filtered_data['age']}")
+
+        self.clear_widgets()
+        self.generate_layout()
 
 
 class Bracket(BoxLayout):
