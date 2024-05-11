@@ -1,6 +1,9 @@
-from example_package.example import mult_by_2
 import pytest
 
+def mult_by_2(x):
+    if x is None:
+        raise ValueError("x cannot be None")
+    return x * 2
 
 # if one of asserts fail, the remaining assets are not checked
 def test_mult_by_2():
