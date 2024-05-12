@@ -157,7 +157,7 @@ class ShowParticipants(ScrollView):
         layout.add_widget(age_layout)
         layout.add_widget(
             TextInput(
-                hint_text="Filter Weight Cat.", text=self.text_inputs[5], 
+                hint_text="Filter Weight Cat.", text=self.text_inputs[5],
                 on_text_validate=self.apply_filters, multiline=False
             )
         )
@@ -186,8 +186,8 @@ class ShowParticipants(ScrollView):
         for label_name in self.filtered_data.columns[:-1]:
             layout.add_widget(
                 Label(
-                    text=str(participant[label_name]), 
-                    font_size=12, 
+                    text=str(participant[label_name]),
+                    font_size=12,
                     color=(0.1294, 0.1294, 0.1294, 1)
                 )
             )
@@ -235,8 +235,8 @@ class ShowParticipants(ScrollView):
         ]
 
         text_filters = [
-            text.strip() for i, text in enumerate(self.text_inputs) \
-            if i not in self.numeric_data_info['age']['column_indices'] \
+            text.strip() for i, text in enumerate(self.text_inputs)
+            if i not in self.numeric_data_info['age']['column_indices']
             and i not in self.numeric_data_info['weight']['column_indices']
         ]
         logging.info(f"Applied text filters: {text_filters}")
