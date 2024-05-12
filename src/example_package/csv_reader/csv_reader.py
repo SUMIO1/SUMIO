@@ -1,4 +1,4 @@
-from config.constraints import CONSTRAINTS
+from src.config.constraints import CONSTRAINTS
 from tkinter import filedialog, messagebox
 import pandas as pd
 from pandas import DataFrame

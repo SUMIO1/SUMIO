@@ -10,8 +10,8 @@ from kivy.uix.slider import Slider
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from tkinter import messagebox
-from example_package.csv_reader import csv_reader
-from config.constraints import CONSTRAINTS
+from src.example_package.csv_reader import csv_reader
+from src.config.constraints import CONSTRAINTS
 
 import logging
 
@@ -83,16 +83,24 @@ class ShowParticipants(ScrollView):
         super(ShowParticipants, self).__init__(**kwargs)
         self.participants_data = participants_data
         self.filtered_data = participants_data
-        self.age_filter_range = (0, 100)
-        self.weight_filter_range = (0, 200)
+        self.max_age = CONSTRAINTS["age_categories"]["Men"]["max_age"]
+        self.max_weight = CONSTRAINTS["age_categories"]["Men"]["Heavy-weight"]["max"]
+        self.age_filter_range = (0, self.max_age)
+        self.weight_filter_range = (0, self.max_weight)
+        self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS["required_columns"][:-1]]
+        self.headers[3] += f" (max {self.max_age})"
+        self.headers[5] += f" (max {self.max_weight})"
+        self.init_filtering_keys()
         self.generate_layout()
+
+    def init_filtering_keys(self):
+        self.text_filter_keys = CONSTRAINTS["required_columns"][:-1]
+        self.text_filter_keys.remove("age")
+        self.text_filter_keys.remove("weight")
 
     def generate_layout(self):
         layout = GridLayout(cols=7, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
-        self.text_filter_keys = CONSTRAINTS["required_columns"][:-1]
-        self.headers = [header.replace('_', ' ').title() for header in self.text_filter_keys]
-
         self.put_search_button(layout)
         for header in self.headers:
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
@@ -113,20 +121,21 @@ class ShowParticipants(ScrollView):
     def put_search_filters(self, layout):
         layout.add_widget(TextInput(hint_text="Filter Name", on_text_validate=self.apply_filters))
         layout.add_widget(TextInput(hint_text="Filter Surname", on_text_validate=self.apply_filters))
-        layout.add_widget(TextInput(hint_text="Filter Age Category", on_text_validate=self.apply_filters))
-        layout.add_widget(Slider(min=0, max=100, value=self.age_filter_range[1], on_value=self.apply_filters))
-        layout.add_widget(TextInput(hint_text="Filter Weight Category", on_text_validate=self.apply_filters))
-        layout.add_widget(Slider(min=0, max=200, value=self.weight_filter_range[1], on_value=self.apply_filters))
+        layout.add_widget(TextInput(hint_text="Filter Age Cat.", on_text_validate=self.apply_filters))
+        layout.add_widget(Slider(
+            min=0, max=self.max_age, value=self.age_filter_range[1], on_value=self.apply_filters, 
+            value_track=True, value_track_color=[1, 0, 0, 1])
+        )
+        layout.add_widget(TextInput(hint_text="Filter Weight Cat.", on_text_validate=self.apply_filters))
+        layout.add_widget(Slider(
+            min=0, max=self.max_weight, value=self.weight_filter_range[1], on_value=self.apply_filters, 
+            value_track=True, value_track_color=[1, 0, 0, 1])
+        )
         layout.add_widget(TextInput(hint_text="Filter Country", on_text_validate=self.apply_filters))
 
     def add_participant_labels(self, layout, participant):
         for label_name in self.filtered_data.columns[:-1]:
             layout.add_widget(Label(text=str(participant[label_name]), font_size=12, color=(0.1294, 0.1294, 0.1294, 1)))
-
-    def print_participant(self, instance):
-        index = instance.parent.children.index(instance)
-        participant = self.filtered_data.iloc[index // 8]
-        print(participant)
 
     def apply_filters(self, *args):
         text_inputs = []
@@ -138,7 +147,7 @@ class ShowParticipants(ScrollView):
                         text_inputs.append(widget.text)
                     elif isinstance(widget, Slider):
                         sliders.append(widget.value)
-        
+
         text_inputs = text_inputs[::-1]
 
         weight_filter = int(sliders[0])
