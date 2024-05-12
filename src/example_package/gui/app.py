@@ -6,7 +6,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
-from kivy.uix.slider import Slider
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from tkinter import messagebox
@@ -93,8 +92,8 @@ class ShowParticipants(ScrollView):
                 'column_indices': [6, 7]
             }
         }
-
         self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
+        self.text_inputs = ['' for _ in range(len(self.headers) + 2)]
         self.init_filtering_keys()
         self.generate_layout()
 
@@ -124,31 +123,82 @@ class ShowParticipants(ScrollView):
             layout.add_widget(Label())
 
     def put_search_filters(self, layout):
-        layout.add_widget(TextInput(hint_text="Filter Name", on_text_validate=self.apply_filters, multiline=False))
-        layout.add_widget(TextInput(hint_text="Filter Surname", on_text_validate=self.apply_filters, multiline=False))
-        layout.add_widget(TextInput(hint_text="Filter Age Cat.", on_text_validate=self.apply_filters, multiline=False))
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Name", text=self.text_inputs[0],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Surname", text=self.text_inputs[1],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Age Cat.", text=self.text_inputs[2],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
         age_layout = GridLayout(cols=2, spacing=5)
-        age_layout.add_widget(TextInput(hint_text="Min", on_text_validate=self.apply_filters, multiline=False))
-        age_layout.add_widget(TextInput(hint_text="Max", on_text_validate=self.apply_filters, multiline=False))
+        age_layout.add_widget(
+            TextInput(
+                hint_text="Min", text=str(self.text_inputs[3]),
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        age_layout.add_widget(
+            TextInput(
+                hint_text="Max", text=str(self.text_inputs[4]),
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
         layout.add_widget(age_layout)
-        layout.add_widget(TextInput(hint_text="Filter Weight Cat.", on_text_validate=self.apply_filters, multiline=False))
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Weight Cat.", text=self.text_inputs[5], 
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
         weight_layout = GridLayout(cols=2, spacing=5)
-        weight_layout.add_widget(TextInput(hint_text="Min", on_text_validate=self.apply_filters, multiline=False))
-        weight_layout.add_widget(TextInput(hint_text="Max", on_text_validate=self.apply_filters, multiline=False))
+        weight_layout.add_widget(
+            TextInput(
+                hint_text="Min", text=str(self.text_inputs[6]),
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        weight_layout.add_widget(
+            TextInput(
+                hint_text="Max", text=str(self.text_inputs[7]),
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
         layout.add_widget(weight_layout)
-        layout.add_widget(TextInput(hint_text="Filter Country", on_text_validate=self.apply_filters, multiline=False))
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Country", text=self.text_inputs[8],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
 
     def add_participant_labels(self, layout, participant):
         for label_name in self.filtered_data.columns[:-1]:
-            layout.add_widget(Label(text=str(participant[label_name]), font_size=12, color=(0.1294, 0.1294, 0.1294, 1)))
+            layout.add_widget(
+                Label(
+                    text=str(participant[label_name]), 
+                    font_size=12, 
+                    color=(0.1294, 0.1294, 0.1294, 1)
+                )
+            )
 
-    def add_numeric_filter_range(self, text_inputs, key):
+    def add_numeric_filter_range(self, key):
         input_range = [
             self.numeric_data_info[key]['constraints'][0],
             self.numeric_data_info[key]['constraints'][1]
         ]
         for i, val in enumerate(self.numeric_data_info[key]['column_indices']):
-            data_val = text_inputs[val]
+            data_val = self.text_inputs[val]
             if not data_val or not data_val.isnumeric():
                 continue
             data_val = int(data_val)
@@ -173,9 +223,9 @@ class ShowParticipants(ScrollView):
         return text_inputs[::-1]
 
     def apply_filters(self, *args):
-        text_inputs = self.get_filter_inputs()
-        age_input_range = self.add_numeric_filter_range(text_inputs, 'age')
-        weight_input_range = self.add_numeric_filter_range(text_inputs, 'weight')
+        self.text_inputs = self.get_filter_inputs()
+        age_input_range = self.add_numeric_filter_range('age')
+        weight_input_range = self.add_numeric_filter_range('weight')
         logging.info(f"Applied age filter: {age_input_range}")
         logging.info(f"Applied weight filter: {weight_input_range}")
 
@@ -185,7 +235,7 @@ class ShowParticipants(ScrollView):
         ]
 
         text_filters = [
-            text.strip() for i, text in enumerate(text_inputs) \
+            text.strip() for i, text in enumerate(self.text_inputs) \
             if i not in self.numeric_data_info['age']['column_indices'] \
             and i not in self.numeric_data_info['weight']['column_indices']
         ]
