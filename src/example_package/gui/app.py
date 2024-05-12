@@ -123,12 +123,12 @@ class ShowParticipants(ScrollView):
         layout.add_widget(TextInput(hint_text="Filter Surname", on_text_validate=self.apply_filters))
         layout.add_widget(TextInput(hint_text="Filter Age Cat.", on_text_validate=self.apply_filters))
         layout.add_widget(Slider(
-            min=0, max=self.max_age, value=self.age_filter_range[1], on_value=self.apply_filters, 
+            min=0, max=self.max_age, value=self.age_filter_range[1], on_value=self.apply_filters,
             value_track=True, value_track_color=[1, 0, 0, 1])
         )
         layout.add_widget(TextInput(hint_text="Filter Weight Cat.", on_text_validate=self.apply_filters))
         layout.add_widget(Slider(
-            min=0, max=self.max_weight, value=self.weight_filter_range[1], on_value=self.apply_filters, 
+            min=0, max=self.max_weight, value=self.weight_filter_range[1], on_value=self.apply_filters,
             value_track=True, value_track_color=[1, 0, 0, 1])
         )
         layout.add_widget(TextInput(hint_text="Filter Country", on_text_validate=self.apply_filters))
