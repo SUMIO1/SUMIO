@@ -83,20 +83,25 @@ class ShowParticipants(ScrollView):
         super(ShowParticipants, self).__init__(**kwargs)
         self.participants_data = participants_data
         self.filtered_data = participants_data
-        self.max_age = CONSTRAINTS["age_categories"]["Men"]["max_age"]
-        self.max_weight = CONSTRAINTS["age_categories"]["Men"]["Heavy-weight"]["max"]
-        self.age_filter_range = (0, self.max_age)
-        self.weight_filter_range = (0, self.max_weight)
-        self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS["required_columns"][:-1]]
-        self.headers[3] += f" (max {self.max_age})"
-        self.headers[5] += f" (max {self.max_weight})"
+        self.numeric_data_info = {
+            'age': {
+                'constraints': (0, CONSTRAINTS['age_categories']['Men']['max_age']),
+                'column_indices': [3, 4]
+            },
+            'weight': {
+                'constraints': (0, CONSTRAINTS['age_categories']['Men']['Heavy-weight']['max']),
+                'column_indices': [6, 7]
+            }
+        }
+
+        self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
         self.init_filtering_keys()
         self.generate_layout()
 
     def init_filtering_keys(self):
-        self.text_filter_keys = CONSTRAINTS["required_columns"][:-1]
-        self.text_filter_keys.remove("age")
-        self.text_filter_keys.remove("weight")
+        self.text_filter_keys = CONSTRAINTS['required_columns'][:-1]
+        self.text_filter_keys.remove('age')
+        self.text_filter_keys.remove('weight')
 
     def generate_layout(self):
         layout = GridLayout(cols=7, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
@@ -119,47 +124,71 @@ class ShowParticipants(ScrollView):
             layout.add_widget(Label())
 
     def put_search_filters(self, layout):
-        layout.add_widget(TextInput(hint_text="Filter Name", on_text_validate=self.apply_filters))
-        layout.add_widget(TextInput(hint_text="Filter Surname", on_text_validate=self.apply_filters))
-        layout.add_widget(TextInput(hint_text="Filter Age Cat.", on_text_validate=self.apply_filters))
-        layout.add_widget(Slider(
-            min=0, max=self.max_age, value=self.age_filter_range[1], on_value=self.apply_filters,
-            value_track=True, value_track_color=[1, 0, 0, 1])
-        )
-        layout.add_widget(TextInput(hint_text="Filter Weight Cat.", on_text_validate=self.apply_filters))
-        layout.add_widget(Slider(
-            min=0, max=self.max_weight, value=self.weight_filter_range[1], on_value=self.apply_filters,
-            value_track=True, value_track_color=[1, 0, 0, 1])
-        )
-        layout.add_widget(TextInput(hint_text="Filter Country", on_text_validate=self.apply_filters))
+        layout.add_widget(TextInput(hint_text="Filter Name", on_text_validate=self.apply_filters, multiline=False))
+        layout.add_widget(TextInput(hint_text="Filter Surname", on_text_validate=self.apply_filters, multiline=False))
+        layout.add_widget(TextInput(hint_text="Filter Age Cat.", on_text_validate=self.apply_filters, multiline=False))
+        age_layout = GridLayout(cols=2, spacing=5)
+        age_layout.add_widget(TextInput(hint_text="Min", on_text_validate=self.apply_filters, multiline=False))
+        age_layout.add_widget(TextInput(hint_text="Max", on_text_validate=self.apply_filters, multiline=False))
+        layout.add_widget(age_layout)
+        layout.add_widget(TextInput(hint_text="Filter Weight Cat.", on_text_validate=self.apply_filters, multiline=False))
+        weight_layout = GridLayout(cols=2, spacing=5)
+        weight_layout.add_widget(TextInput(hint_text="Min", on_text_validate=self.apply_filters, multiline=False))
+        weight_layout.add_widget(TextInput(hint_text="Max", on_text_validate=self.apply_filters, multiline=False))
+        layout.add_widget(weight_layout)
+        layout.add_widget(TextInput(hint_text="Filter Country", on_text_validate=self.apply_filters, multiline=False))
 
     def add_participant_labels(self, layout, participant):
         for label_name in self.filtered_data.columns[:-1]:
             layout.add_widget(Label(text=str(participant[label_name]), font_size=12, color=(0.1294, 0.1294, 0.1294, 1)))
 
-    def apply_filters(self, *args):
+    def add_numeric_filter_range(self, text_inputs, key):
+        input_range = [
+            self.numeric_data_info[key]['constraints'][0],
+            self.numeric_data_info[key]['constraints'][1]
+        ]
+        for i, val in enumerate(self.numeric_data_info[key]['column_indices']):
+            data_val = text_inputs[val]
+            if not data_val or not data_val.isnumeric():
+                continue
+            data_val = int(data_val)
+            if data_val in range(*input_range):
+                input_range[i] = data_val
+
+        return input_range
+
+    def get_filter_inputs(self):
         text_inputs = []
-        sliders = []
         for child in self.children:
-            if isinstance(child, GridLayout):
-                for widget in child.children:
-                    if isinstance(widget, TextInput):
-                        text_inputs.append(widget.text)
-                    elif isinstance(widget, Slider):
-                        sliders.append(widget.value)
+            if not isinstance(child, GridLayout):
+                continue
+            for widget in child.children:
+                if isinstance(widget, TextInput):
+                    text_inputs.append(widget.text)
+                elif isinstance(widget, GridLayout):
+                    for sub_widget in widget.children:
+                        if not isinstance(sub_widget, TextInput):
+                            continue
+                        text_inputs.append(sub_widget.text)
+        return text_inputs[::-1]
 
-        text_inputs = text_inputs[::-1]
+    def apply_filters(self, *args):
+        text_inputs = self.get_filter_inputs()
+        age_input_range = self.add_numeric_filter_range(text_inputs, 'age')
+        weight_input_range = self.add_numeric_filter_range(text_inputs, 'weight')
+        logging.info(f"Applied age filter: {age_input_range}")
+        logging.info(f"Applied weight filter: {weight_input_range}")
 
-        weight_filter = int(sliders[0])
-        age_filter = int(sliders[1])
-        logging.info(f"Applied weight filter: {weight_filter}")
-        logging.info(f"Applied age filter: {age_filter}")
         self.filtered_data = self.participants_data.loc[
-            (self.participants_data['age'].between(0, age_filter)) &
-            (self.participants_data['weight'].between(0, weight_filter))
+            (self.participants_data['age'].between(*age_input_range)) &
+            (self.participants_data['weight'].between(*weight_input_range))
         ]
 
-        text_filters = [text.strip() for text in text_inputs]
+        text_filters = [
+            text.strip() for i, text in enumerate(text_inputs) \
+            if i not in self.numeric_data_info['age']['column_indices'] \
+            and i not in self.numeric_data_info['weight']['column_indices']
+        ]
         logging.info(f"Applied text filters: {text_filters}")
         for i, text in enumerate(text_filters):
             if text:
