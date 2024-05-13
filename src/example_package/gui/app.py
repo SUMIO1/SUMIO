@@ -12,6 +12,7 @@ from tkinter import messagebox
 from src.example_package.csv_reader import csv_reader
 from src.config.constraints import CONSTRAINTS
 
+import re
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -83,13 +84,13 @@ class ShowParticipants(ScrollView):
         self.participants_data = participants_data
         self.filtered_data = participants_data
         self.numeric_data_info = {
-            'age': {
+            'date_of_birth': {
                 'constraints': (0, CONSTRAINTS['age_categories']['Men']['max_age']),
-                'column_indices': [3, 4]
+                'column_indices': [3]
             },
             'weight': {
                 'constraints': (0, CONSTRAINTS['age_categories']['Men']['Heavy-weight']['max']),
-                'column_indices': [6, 7]
+                'column_indices': [5, 6]
             }
         }
         self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
@@ -99,7 +100,7 @@ class ShowParticipants(ScrollView):
 
     def init_filtering_keys(self):
         self.text_filter_keys = CONSTRAINTS['required_columns'][:-1]
-        self.text_filter_keys.remove('age')
+        self.text_filter_keys.remove('date_of_birth')
         self.text_filter_keys.remove('weight')
 
     def generate_layout(self):
@@ -141,43 +142,35 @@ class ShowParticipants(ScrollView):
                 on_text_validate=self.apply_filters, multiline=False
             )
         )
-        age_layout = GridLayout(cols=2, spacing=5)
-        age_layout.add_widget(
-            TextInput(
-                hint_text="Min", text=str(self.text_inputs[3]),
-                on_text_validate=self.apply_filters, multiline=False
-            )
-        )
-        age_layout.add_widget(
-            TextInput(
-                hint_text="Max", text=str(self.text_inputs[4]),
-                on_text_validate=self.apply_filters, multiline=False
-            )
-        )
-        layout.add_widget(age_layout)
         layout.add_widget(
             TextInput(
-                hint_text="Filter Weight Cat.", text=self.text_inputs[5],
+                hint_text="Filter Birth Date", text=self.text_inputs[3],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Weight Cat.", text=self.text_inputs[4],
                 on_text_validate=self.apply_filters, multiline=False
             )
         )
         weight_layout = GridLayout(cols=2, spacing=5)
         weight_layout.add_widget(
             TextInput(
-                hint_text="Min", text=str(self.text_inputs[6]),
+                hint_text="Min", text=str(self.text_inputs[5]),
                 on_text_validate=self.apply_filters, multiline=False
             )
         )
         weight_layout.add_widget(
             TextInput(
-                hint_text="Max", text=str(self.text_inputs[7]),
+                hint_text="Max", text=str(self.text_inputs[6]),
                 on_text_validate=self.apply_filters, multiline=False
             )
         )
         layout.add_widget(weight_layout)
         layout.add_widget(
             TextInput(
-                hint_text="Filter Country", text=self.text_inputs[8],
+                hint_text="Filter Country", text=self.text_inputs[7],
                 on_text_validate=self.apply_filters, multiline=False
             )
         )
@@ -207,6 +200,12 @@ class ShowParticipants(ScrollView):
 
         return input_range
 
+    def validate_input_birth_date(self):
+        date_pattern = r'^\d{4}-\d{2}-\d{2}$'
+        birth_date_idx = self.numeric_data_info['date_of_birth']['column_indices'][0]
+        if not re.match(date_pattern, self.text_inputs[birth_date_idx]):
+            self.text_inputs[birth_date_idx] = ""
+
     def get_filter_inputs(self):
         text_inputs = []
         for child in self.children:
@@ -224,27 +223,33 @@ class ShowParticipants(ScrollView):
 
     def apply_filters(self, *args):
         self.text_inputs = self.get_filter_inputs()
-        age_input_range = self.add_numeric_filter_range('age')
+        self.validate_input_birth_date()
         weight_input_range = self.add_numeric_filter_range('weight')
-        logging.info(f"Applied age filter: {age_input_range}")
-        logging.info(f"Applied weight filter: {weight_input_range}")
 
         self.filtered_data = self.participants_data.loc[
-            (self.participants_data['age'].between(*age_input_range)) &
             (self.participants_data['weight'].between(*weight_input_range))
         ]
+        logging.info(f"Applied weight filter: {weight_input_range}")
+
+        birth_date_idx = self.numeric_data_info['date_of_birth']['column_indices'][0]
+        date_of_birth = self.text_inputs[birth_date_idx]
+        if date_of_birth:
+            self.filtered_data = self.filtered_data.loc[
+                (self.participants_data['date_of_birth'] == date_of_birth)
+            ]
+            logging.info(f"Applied birth date filter: {self.text_inputs[birth_date_idx]}")
 
         text_filters = [
             text.strip() for i, text in enumerate(self.text_inputs)
-            if i not in self.numeric_data_info['age']['column_indices']
+            if i not in self.numeric_data_info['date_of_birth']['column_indices']
             and i not in self.numeric_data_info['weight']['column_indices']
         ]
-        logging.info(f"Applied text filters: {text_filters}")
         for i, text in enumerate(text_filters):
             if text:
                 self.filtered_data = self.filtered_data.loc[
                     (self.participants_data[self.text_filter_keys[i]].str.lower() == text.lower())
                 ]
+        logging.info(f"Applied text filters: {text_filters}")
 
         self.clear_widgets()
         self.generate_layout()
