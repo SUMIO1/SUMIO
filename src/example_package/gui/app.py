@@ -3,13 +3,18 @@ from kivy.metrics import dp
 from kivy.properties import StringProperty
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from tkinter import messagebox
+
+from kivy.uix.widget import Widget
+
 from src.example_package.csv_reader import csv_reader
 from src.config.constraints import CONSTRAINTS
+import pandas as pd
 
 import logging
 
@@ -42,7 +47,12 @@ class MainScreen(BoxLayout):
                 messagebox.showerror("Error", "No data to show. Please load a CSV file.")
                 return
 
-            content.add_widget(ShowParticipants(self.init_dataframe(csv_reader.df)))
+            show_participants = ShowParticipants(self.init_dataframe(csv_reader.df))
+            content.add_widget(show_participants)
+            # until we change the way we route screens,
+            # the method "generate_layout" has to be invoked after "content.add_widget(show_participants)"
+            show_participants.generate_layout()
+
         elif item == 'Bracket':
             content.add_widget(Bracket())
 
@@ -56,6 +66,11 @@ class MainScreen(BoxLayout):
         cols = list(df)
         cols[idx2], cols[idx1] = cols[idx1], cols[idx2]
         return df.loc[:, cols]
+
+    def update_content_and_show_wrestler(self, wrestler_data: pd.Series):
+        content = self.ids.content
+        content.clear_widgets()
+        content.add_widget(WrestlerProfile(wrestler_data))
 
 
 class Menu(BoxLayout):
@@ -87,6 +102,17 @@ class LoadCSV(BoxLayout):
     pass
 
 
+class ProfileButton(Button):
+    def __init__(self, wrestler: pd.Series, main_screen: MainScreen, **kwargs):
+        super().__init__(**kwargs)
+        self.wrestler = wrestler
+        self.main_screen = main_screen
+
+    def on_press(self):
+        super().on_press()
+        self.main_screen.update_content_and_show_wrestler(self.wrestler)
+
+
 class ShowParticipants(ScrollView):
 
     def __init__(self, participants_data, **kwargs):
@@ -104,10 +130,10 @@ class ShowParticipants(ScrollView):
         self.participants_data = participants_data
         self.filtered_data = participants_data
         self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
+        self.headers.append("Profile")
         self.headers[3] = 'Age'
         self.text_inputs = ['' for _ in range(len(self.headers) + 2)]
         self.init_filtering_keys()
-        self.generate_layout()
 
     def init_filtering_keys(self):
         self.text_filter_keys = CONSTRAINTS['required_columns'][:-1]
@@ -116,6 +142,8 @@ class ShowParticipants(ScrollView):
 
     def generate_layout(self):
         layout = GridLayout(cols=7, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
+
+        layout = GridLayout(cols=8, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
         for header in self.headers:
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
@@ -185,6 +213,7 @@ class ShowParticipants(ScrollView):
                 on_text_validate=self.apply_filters, multiline=False
             )
         )
+        layout.add_widget(Widget())
 
     def add_participant_labels(self, layout, participant):
         for label_name in self.filtered_data.columns[:-2]:
@@ -195,6 +224,10 @@ class ShowParticipants(ScrollView):
                     color=(0.1294, 0.1294, 0.1294, 1)
                 )
             )
+
+        # add a button that takes the user to the wrestler's profile
+        btn = ProfileButton(participant, self.parent.parent)
+        layout.add_widget(btn)
 
     def add_numeric_filter_range(self, key):
         input_range = [
@@ -252,6 +285,12 @@ class ShowParticipants(ScrollView):
 
         self.clear_widgets()
         self.generate_layout()
+
+
+class WrestlerProfile(BoxLayout):
+    def __init__(self, wrestler_data: pd.Series, **kwargs):
+        super().__init__(**kwargs)
+        self.wrestler_data = wrestler_data
 
 
 class Bracket(BoxLayout):

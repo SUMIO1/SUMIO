@@ -164,6 +164,18 @@
             size: self.size
             pos: self.pos
 
+<ProfileButton>:
+    text: '>'
+    background_color: 0, 0, 1, 0
+    color: 0, 0, 1, 0.5
+    size_hint: 1, None
+    height: 10
+    canvas.before:
+        Color:
+            rgba: 0, 1, 0, 0.5
+
+<WrestlerProfile>:
+
 <Bracket>:
     canvas.before:
         Color:
