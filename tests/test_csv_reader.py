@@ -15,16 +15,6 @@ VALID_DATA = pd.DataFrame({
     'image_url': ['https://example.com/john_doe.jpg', 'https://example.com/alice_smith.jpg']
 })
 
-MISSING_COLUMN_DATA = pd.DataFrame({
-    'name': ['John', 'Alice'],
-    'surname': ['Doe', 'Smith'],
-    'age_category': ['Jr. Men', 'Jr. Women'],
-    'date_of_birth': ['2008-09-28', '2007-03-11'],
-    'weight_category': ['Light-weight', 'Middle-weight'],
-    'country': ['USA', 'Canada'],
-    'image_url': ['https://example.com/john_doe.jpg', 'https://example.com/alice_smith.jpg']
-})
-
 WRONG_WEIGHT_CATEGORY_DATA = pd.DataFrame({
     'name': ['John', 'Alice'],
     'surname': ['Doe', 'Smith'],
@@ -42,12 +32,14 @@ def test_validateCSV_valid_data():
 
 
 def test_validateCSV_missing_column():
+    MISSING_COLUMN_DATA = copy.deepcopy(VALID_DATA)
+    MISSING_COLUMN_DATA.drop(columns=['weight_category'], inplace=True)
     with pytest.raises(ValueError):
         validateCSV(MISSING_COLUMN_DATA)
 
 
 def test_validateCSV_wrong_column_name():
-    WRONG_COLUMN_DATA = MISSING_COLUMN_DATA
+    WRONG_COLUMN_DATA = VALID_DATA
     WRONG_COLUMN_DATA.rename(columns={"country": "cntr"}, inplace=True)
     with pytest.raises(ValueError):
         validateCSV(WRONG_COLUMN_DATA)
@@ -63,6 +55,13 @@ def test_validateCSV_wrong_age_category():
 def test_validateCSV_wrong_weight_category():
     with pytest.raises(ValueError):
         validateCSV(WRONG_WEIGHT_CATEGORY_DATA)
+
+
+def test_validateCSV_age_out_of_range():
+    AGE_OUT_OF_RANGE_DATA = copy.deepcopy(VALID_DATA)
+    AGE_OUT_OF_RANGE_DATA.loc[0, 'date_of_birth'] = '2004-09-28'
+    with pytest.raises(ValueError):
+        validateCSV(AGE_OUT_OF_RANGE_DATA)
 
 
 def test_validateCSV_weight_out_of_range():
