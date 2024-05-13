@@ -1,5 +1,3 @@
-import datetime as datetime
-
 from src.config.constraints import CONSTRAINTS
 from tkinter import filedialog, messagebox
 import pandas as pd
