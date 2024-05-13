@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 
 CONSTRAINTS: Dict[str, Any] = {
-    "required_columns": ['name', 'surname', 'age_category', 'age', 'weight_category', 'weight', 'country', 'image_url'],
+    "required_columns": ['name', 'surname', 'age_category', 'date_of_birth', 'weight_category', 'weight', 'country', 'image_url'],
     "age_categories": {
         "Jr. Men": {
             "min_age": 13,
