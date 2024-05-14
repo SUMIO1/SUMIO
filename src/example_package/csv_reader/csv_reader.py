@@ -32,9 +32,6 @@ def validateCSV(df: DataFrame):
 
         # Check if age category is properly assigned
         date_of_birth_str = row['date_of_birth']
-        # date_of_birt = datetime.strptime(date_of_birth_str, '%Y-%m-%d')
-        # today = datetime.today()
-        # age = today.year - date_of_birt.year - ((today.month, today.day) < (date_of_birt.month, date_of_birt.day))
         age = birthDateToAge(date_of_birth_str)
         min_age = CONSTRAINTS['age_categories'][row['age_category']]['min_age']
         max_age = CONSTRAINTS['age_categories'][row['age_category']]['max_age']
