@@ -291,6 +291,10 @@ class WrestlerInfo(Label):
     pass
 
 
+class PrettyButton(Button):
+    pass
+
+
 class WrestlerProfile(BoxLayout):
     def __init__(self, wrestler_data: pd.Series, **kwargs):
         super().__init__(**kwargs)
@@ -304,6 +308,11 @@ class WrestlerProfile(BoxLayout):
         self.ids['country'].text = "Country: " + wrestler_data['country']
 
         self.ids['image'].source = 'https://picsum.photos/250'
+
+        def callback(instance):
+            print("Button pressed: " + str(instance))
+        self.ids['btn_edit_profile'].bind(on_press=callback)
+        self.ids['btn_add_to_tournament'].bind(on_press=callback)
 
 
 class Bracket(BoxLayout):
