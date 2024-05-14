@@ -1,9 +1,12 @@
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.properties import StringProperty
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.behaviors import ButtonBehavior
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.image import Image
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
@@ -102,7 +105,7 @@ class LoadCSV(BoxLayout):
     pass
 
 
-class ProfileButton(Button):
+class ProfileButton(ButtonBehavior, Image):
     def __init__(self, wrestler: pd.Series, main_screen: MainScreen, **kwargs):
         super().__init__(**kwargs)
         self.wrestler = wrestler
@@ -130,8 +133,8 @@ class ShowParticipants(ScrollView):
         self.participants_data = participants_data
         self.filtered_data = participants_data
         self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
-        self.headers.append("Profile")
         self.headers[3] = 'Age'
+        self.headers.insert(0, "Profile")
         self.text_inputs = ['' for _ in range(len(self.headers) + 2)]
         self.init_filtering_keys()
 
@@ -141,10 +144,13 @@ class ShowParticipants(ScrollView):
         self.text_filter_keys.remove('weight')
 
     def generate_layout(self):
-        layout = GridLayout(cols=7, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
 
         layout = GridLayout(cols=8, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
+
+        headers = [header.replace('_', ' ').title() for header in CONSTRAINTS["required_columns"][:-1]]
+        headers.insert(0, "Profile")
+
         for header in self.headers:
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
 
@@ -155,6 +161,8 @@ class ShowParticipants(ScrollView):
         self.add_widget(layout)
 
     def put_search_filters(self, layout):
+        # empty widget to make place for the "profile" column
+        layout.add_widget(Widget())
         layout.add_widget(
             TextInput(
                 hint_text="Filter Name", text=self.text_inputs[0],
@@ -213,9 +221,14 @@ class ShowParticipants(ScrollView):
                 on_text_validate=self.apply_filters, multiline=False
             )
         )
-        layout.add_widget(Widget())
 
     def add_participant_labels(self, layout, participant):
+        # add a button that takes the user to the wrestler's profile
+        btn = ProfileButton(participant, self.parent.parent, source="../../resources/icons/user_in_circle_48.png")
+        anch = AnchorLayout(anchor_x='center', anchor_y='center')
+        anch.add_widget(btn)
+        layout.add_widget(anch)
+
         for label_name in self.filtered_data.columns[:-2]:
             layout.add_widget(
                 Label(
@@ -224,10 +237,6 @@ class ShowParticipants(ScrollView):
                     color=(0.1294, 0.1294, 0.1294, 1)
                 )
             )
-
-        # add a button that takes the user to the wrestler's profile
-        btn = ProfileButton(participant, self.parent.parent)
-        layout.add_widget(btn)
 
     def add_numeric_filter_range(self, key):
         input_range = [
@@ -309,6 +318,7 @@ class WrestlerProfile(BoxLayout):
 
         self.ids['image'].source = 'https://picsum.photos/250'
 
+        # temporary, just to check if buttons work
         def callback(instance):
             print("Button pressed: " + str(instance))
         self.ids['btn_edit_profile'].bind(on_press=callback)
