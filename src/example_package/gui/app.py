@@ -321,8 +321,9 @@ class WrestlerProfile(BoxLayout):
         self.ids['name_surname'].text = "Participant: " + wrestler_data['name'] + " " + wrestler_data['surname']
         self.ids['age_category'].text = "Age Category: " + wrestler_data['age_category']
         self.ids['date_of_birth'].text = "Date of Birth: " + wrestler_data['date_of_birth']
+        self.ids['age'].text = "Age: " + str(wrestler_data['age'])
         self.ids['weight_category'].text = "Weight: " + wrestler_data['weight_category']
-        self.ids['weight'].text = "Weight: " + str(wrestler_data['weight'])
+        self.ids['weight'].text = "Weight: " + str(wrestler_data['weight']) + " kg"
         self.ids['country'].text = "Country: " + wrestler_data['country']
 
         self.ids['image'].source = 'https://picsum.photos/250'
