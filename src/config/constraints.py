@@ -17,7 +17,7 @@ CONSTRAINTS: Dict[str, Any] = {
             },
             "Heavy-weight": {
                 "min": 100,
-                "max": 200
+                "max": float('inf')
             },
             "Open-weight": None
         },
@@ -34,13 +34,13 @@ CONSTRAINTS: Dict[str, Any] = {
             },
             "Heavy-weight": {
                 "min": 75,
-                "max": 200
+                "max": float('inf')
             },
             "Open-weight": None
         },
         "Men": {
             "min_age": 19,
-            "max_age": 100,
+            "max_age": float('inf'),
             "Light-weight": {
                 "min": 0,
                 "max": 85
@@ -55,13 +55,13 @@ CONSTRAINTS: Dict[str, Any] = {
             },
             "Heavy-weight": {
                 "min": 115,
-                "max": 200
+                "max": float('inf')
             },
             "Open-weight": None
         },
         "Women": {
             "min_age": 19,
-            "max_age": 100,
+            "max_age": float('inf'),
             "Light-weight": {
                 "min": 0,
                 "max": 65
@@ -76,7 +76,7 @@ CONSTRAINTS: Dict[str, Any] = {
             },
             "Heavy-weight": {
                 "min": 80,
-                "max": 200
+                "max": float('inf')
             },
             "Open-weight": None
         }
