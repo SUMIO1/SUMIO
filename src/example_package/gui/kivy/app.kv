@@ -71,13 +71,6 @@
 <Content>:
     size_hint_x: 0.7
 
-    canvas.before:
-        Color:
-            rgba: 0.2, 0.4, 0.5, 1
-        Rectangle:
-            size: self.size
-            pos: self.pos
-
     BoxLayout:
         id: content_box
         orientation: 'vertical'
@@ -198,6 +191,8 @@
         Rectangle:
             size: self.size
             pos: self.pos
+    size_hint_y: None
+    height: 400
     AnchorLayout:
         padding: 40
         BoxLayout:
@@ -223,7 +218,7 @@
             StackLayout:
                 spacing: 15
                 PrettyButton:
-                    text: "Add to tournament"
+                    text: "Toggle participation in tournament"
                     id: btn_add_to_tournament
                 PrettyButton:
                     id: btn_edit_profile
@@ -238,6 +233,24 @@
             size_hint: None, None
             size: 250, 250
 
+<WrestlerSelectedStatus>:
+    orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    size_hint: 1, None
+    height: 50
+    anchor_x: 'left'
+    anchor_y: 'center'
+
+    Label:
+        text: self.parent.participation_message
+        size: self.texture_size
+        color: 0.1, 0.1, 0.1, 1
+        markup: True
 
 <Bracket>:
     canvas.before:

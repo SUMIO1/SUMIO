@@ -73,7 +73,16 @@ class MainScreen(BoxLayout):
     def update_content_and_show_wrestler(self, wrestler_data: pd.Series):
         content = self.ids.content
         content.clear_widgets()
-        content.add_widget(WrestlerProfile(wrestler_data))
+
+        wrestler_info = WrestlerProfile(wrestler_data)
+        wrestler_status = WrestlerSelectedStatus()
+
+        box_layout = BoxLayout(orientation='vertical', spacing=40)
+        box_layout.add_widget(wrestler_info)
+        box_layout.add_widget(wrestler_status)
+        box_layout.add_widget(BoxLayout())
+
+        content.add_widget(box_layout)
 
 
 class Menu(BoxLayout):
@@ -323,6 +332,14 @@ class WrestlerProfile(BoxLayout):
             print("Button pressed: " + str(instance))
         self.ids['btn_edit_profile'].bind(on_press=callback)
         self.ids['btn_add_to_tournament'].bind(on_press=callback)
+
+
+class WrestlerSelectedStatus(AnchorLayout):
+    # to change what is shown in the gui, simply change the value of the property below
+    participation_message = StringProperty("THIS PARTICIPANT IS [b]NOT[/b] SELECTED FOR THE TOURNAMENT")
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Bracket(BoxLayout):
