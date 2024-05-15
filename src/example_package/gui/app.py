@@ -41,9 +41,21 @@ class MainScreen(BoxLayout):
             if csv_reader.df is None:
                 messagebox.showerror("Error", "No data to show. Please load a CSV file.")
                 return
-            content.add_widget(ShowParticipants(csv_reader.df))
+            
+            content.add_widget(ShowParticipants(self.init_dataframe(csv_reader.df)))
         elif item == 'Bracket':
             content.add_widget(Bracket())
+    
+    def init_dataframe(self, df):
+        df['age'] = df['date_of_birth'].apply(csv_reader.birthDateToAge)
+        df = self.swap_df_columns(df, 3, 8)
+        return df
+    
+    @staticmethod
+    def swap_df_columns(df, idx1, idx2):
+        cols = list(df)
+        cols[idx2], cols[idx1] = cols[idx1], cols[idx2]
+        return df.loc[:, cols]
 
 
 class Menu(BoxLayout):
@@ -89,18 +101,13 @@ class ShowParticipants(ScrollView):
                 'column_indices': [6, 7]
             }
         }
-        self.participants_data = self.init_dataframe(participants_data)
+        self.participants_data = participants_data
         self.filtered_data = participants_data
         self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
         self.headers[3] = 'Age'
         self.text_inputs = ['' for _ in range(len(self.headers) + 2)]
         self.init_filtering_keys()
         self.generate_layout()
-
-    def init_dataframe(self, df):
-        df['age'] = df['date_of_birth'].apply(csv_reader.birthDateToAge)
-        df = self.swap_df_columns(df, 3, 8)
-        return df
 
     def init_filtering_keys(self):
         self.text_filter_keys = CONSTRAINTS['required_columns'][:-1]
@@ -192,7 +199,7 @@ class ShowParticipants(ScrollView):
     def add_numeric_filter_range(self, key):
         input_range = [
             self.numeric_data_info[key]['constraints'][0],
-            self.numeric_data_info[key]['constraints'][1]
+            100000
         ]
         for i, val in enumerate(self.numeric_data_info[key]['column_indices']):
             data_val = self.text_inputs[val]
@@ -245,12 +252,6 @@ class ShowParticipants(ScrollView):
 
         self.clear_widgets()
         self.generate_layout()
-
-    @staticmethod
-    def swap_df_columns(df, idx1, idx2):
-        cols = list(df)
-        cols[idx2], cols[idx1] = cols[idx1], cols[idx2]
-        return df.loc[:, cols]
 
 
 class Bracket(BoxLayout):
