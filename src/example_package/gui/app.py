@@ -41,16 +41,16 @@ class MainScreen(BoxLayout):
             if csv_reader.df is None:
                 messagebox.showerror("Error", "No data to show. Please load a CSV file.")
                 return
-            
+
             content.add_widget(ShowParticipants(self.init_dataframe(csv_reader.df)))
         elif item == 'Bracket':
             content.add_widget(Bracket())
-    
+
     def init_dataframe(self, df):
         df['age'] = df['date_of_birth'].apply(csv_reader.birthDateToAge)
         df = self.swap_df_columns(df, 3, 8)
         return df
-    
+
     @staticmethod
     def swap_df_columns(df, idx1, idx2):
         cols = list(df)
