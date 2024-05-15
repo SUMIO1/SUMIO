@@ -1,19 +1,26 @@
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.properties import StringProperty
+from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.textinput import TextInput
 from tkinter import messagebox
 from src.example_package.csv_reader import csv_reader
 from src.config.constraints import CONSTRAINTS
+
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class SumioApp(App):
     kv_file = 'kivy/app.kv'
 
     def build(self):
+        Window.maximize()
         return MainScreen()
 
 
@@ -34,9 +41,21 @@ class MainScreen(BoxLayout):
             if csv_reader.df is None:
                 messagebox.showerror("Error", "No data to show. Please load a CSV file.")
                 return
-            content.add_widget(ShowParticipants(csv_reader.df))
+
+            content.add_widget(ShowParticipants(self.init_dataframe(csv_reader.df)))
         elif item == 'Bracket':
             content.add_widget(Bracket())
+
+    def init_dataframe(self, df):
+        df['age'] = df['date_of_birth'].apply(csv_reader.birthDateToAge)
+        df = self.swap_df_columns(df, 3, 8)
+        return df
+
+    @staticmethod
+    def swap_df_columns(df, idx1, idx2):
+        cols = list(df)
+        cols[idx2], cols[idx1] = cols[idx1], cols[idx2]
+        return df.loc[:, cols]
 
 
 class Menu(BoxLayout):
@@ -68,38 +87,171 @@ class LoadCSV(BoxLayout):
     pass
 
 
-# name,surname,age_category,age,weight_category,weight,country,image_url
-
 class ShowParticipants(ScrollView):
 
     def __init__(self, participants_data, **kwargs):
         super(ShowParticipants, self).__init__(**kwargs)
+        self.numeric_data_info = {
+            'age': {
+                'constraints': (0, CONSTRAINTS['age_categories']['Men']['max_age']),
+                'column_indices': [3, 4]
+            },
+            'weight': {
+                'constraints': (0, CONSTRAINTS['age_categories']['Men']['Heavy-weight']['max']),
+                'column_indices': [6, 7]
+            }
+        }
         self.participants_data = participants_data
+        self.filtered_data = participants_data
+        self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
+        self.headers[3] = 'Age'
+        self.text_inputs = ['' for _ in range(len(self.headers) + 2)]
+        self.init_filtering_keys()
         self.generate_layout()
 
-    def generate_layout(self):
+    def init_filtering_keys(self):
+        self.text_filter_keys = CONSTRAINTS['required_columns'][:-1]
+        self.text_filter_keys.remove('date_of_birth')
+        self.text_filter_keys.remove('weight')
 
+    def generate_layout(self):
         layout = GridLayout(cols=7, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
-
-        headers = [header.replace('_', ' ').title() for header in CONSTRAINTS["required_columns"][:-1]]
-
-        for header in headers:
+        for header in self.headers:
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
 
-        for index, participant in self.participants_data.iterrows():
+        self.put_search_filters(layout)
+        for _, participant in self.filtered_data.iterrows():
             self.add_participant_labels(layout, participant)
 
         self.add_widget(layout)
 
-    def add_participant_labels(self, layout, participant):
-        for label_name in self.participants_data.columns[:-1]:
-            layout.add_widget(Label(text=str(participant[label_name]), font_size=12, color=(0.1294, 0.1294, 0.1294, 1)))
+    def put_search_filters(self, layout):
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Name", text=self.text_inputs[0],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Surname", text=self.text_inputs[1],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Age Cat.", text=self.text_inputs[2],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        age_layout = GridLayout(cols=2, spacing=5)
+        age_layout.add_widget(
+            TextInput(
+                hint_text="Min", text=str(self.text_inputs[3]),
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        age_layout.add_widget(
+            TextInput(
+                hint_text="Max", text=str(self.text_inputs[4]),
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        layout.add_widget(age_layout)
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Weight Cat.", text=self.text_inputs[5],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        weight_layout = GridLayout(cols=2, spacing=5)
+        weight_layout.add_widget(
+            TextInput(
+                hint_text="Min", text=str(self.text_inputs[6]),
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        weight_layout.add_widget(
+            TextInput(
+                hint_text="Max", text=str(self.text_inputs[7]),
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
+        layout.add_widget(weight_layout)
+        layout.add_widget(
+            TextInput(
+                hint_text="Filter Country", text=self.text_inputs[8],
+                on_text_validate=self.apply_filters, multiline=False
+            )
+        )
 
-    def print_participant(self, instance):
-        index = instance.parent.children.index(instance)
-        participant = self.participants_data.iloc[index // 8]
-        print(participant)
+    def add_participant_labels(self, layout, participant):
+        for label_name in self.filtered_data.columns[:-2]:
+            layout.add_widget(
+                Label(
+                    text=str(participant[label_name]),
+                    font_size=12,
+                    color=(0.1294, 0.1294, 0.1294, 1)
+                )
+            )
+
+    def add_numeric_filter_range(self, key):
+        input_range = [
+            self.numeric_data_info[key]['constraints'][0],
+            100000
+        ]
+        for i, val in enumerate(self.numeric_data_info[key]['column_indices']):
+            data_val = self.text_inputs[val]
+            if not data_val or not data_val.isnumeric():
+                continue
+            data_val = int(data_val)
+            if data_val in range(*input_range):
+                input_range[i] = data_val
+
+        return input_range
+
+    def get_filter_inputs(self):
+        text_inputs = []
+        for child in self.children:
+            if not isinstance(child, GridLayout):
+                continue
+            for widget in child.children:
+                if isinstance(widget, TextInput):
+                    text_inputs.append(widget.text)
+                elif isinstance(widget, GridLayout):
+                    for sub_widget in widget.children:
+                        if not isinstance(sub_widget, TextInput):
+                            continue
+                        text_inputs.append(sub_widget.text)
+        return text_inputs[::-1]
+
+    def apply_filters(self, *args):
+        self.text_inputs = self.get_filter_inputs()
+        age_input_range = self.add_numeric_filter_range('age')
+        weight_input_range = self.add_numeric_filter_range('weight')
+
+        self.filtered_data = self.participants_data.loc[
+            (self.participants_data['age'].between(*age_input_range)) &
+            (self.participants_data['weight'].between(*weight_input_range))
+        ]
+        logging.info(f"Applied age filter: {age_input_range}")
+        logging.info(f"Applied weight filter: {weight_input_range}")
+
+        text_filters = [
+            text.strip() for i, text in enumerate(self.text_inputs)
+            if i not in self.numeric_data_info['age']['column_indices']
+            and i not in self.numeric_data_info['weight']['column_indices']
+        ]
+        for i, text in enumerate(text_filters):
+            if text:
+                self.filtered_data = self.filtered_data.loc[
+                    (self.participants_data[self.text_filter_keys[i]].str.lower().str.contains(text.lower()))
+                ]
+        logging.info(f"Applied text filters: {text_filters}")
+
+        self.clear_widgets()
+        self.generate_layout()
 
 
 class Bracket(BoxLayout):

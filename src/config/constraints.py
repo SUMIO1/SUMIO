@@ -1,6 +1,5 @@
 from typing import Any, Dict
 
-# https://stackoverflow.com/questions/54786574/mypy-error-on-dict-of-dict-value-of-type-object-is-not-indexable
 
 CONSTRAINTS: Dict[str, Any] = {
     "required_columns": ['name', 'surname', 'age_category', 'date_of_birth', 'weight_category', 'weight', 'country', 'image_url'],
