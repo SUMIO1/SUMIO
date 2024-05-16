@@ -1,15 +1,23 @@
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.properties import StringProperty
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.behaviors import ButtonBehavior
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
+from kivy.uix.image import Image
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
 from tkinter import messagebox
+
+from kivy.uix.widget import Widget
+
 from src.example_package.csv_reader import csv_reader
 from src.config.constraints import CONSTRAINTS
+import pandas as pd
 
 import logging
 
@@ -42,7 +50,12 @@ class MainScreen(BoxLayout):
                 messagebox.showerror("Error", "No data to show. Please load a CSV file.")
                 return
 
-            content.add_widget(ShowParticipants(self.init_dataframe(csv_reader.df)))
+            show_participants = ShowParticipants(self.init_dataframe(csv_reader.df))
+            content.add_widget(show_participants)
+            # until we change the way we route screens,
+            # the method "generate_layout" has to be invoked after "content.add_widget(show_participants)"
+            show_participants.generate_layout()
+
         elif item == 'Bracket':
             content.add_widget(Bracket())
 
@@ -56,6 +69,20 @@ class MainScreen(BoxLayout):
         cols = list(df)
         cols[idx2], cols[idx1] = cols[idx1], cols[idx2]
         return df.loc[:, cols]
+
+    def update_content_and_show_wrestler(self, wrestler_data: pd.Series):
+        content = self.ids.content
+        content.clear_widgets()
+
+        wrestler_info = WrestlerProfile(wrestler_data)
+        wrestler_status = WrestlerSelectedStatus()
+
+        box_layout = BoxLayout(orientation='vertical', spacing=40)
+        box_layout.add_widget(wrestler_info)
+        box_layout.add_widget(wrestler_status)
+        box_layout.add_widget(BoxLayout())
+
+        content.add_widget(box_layout)
 
 
 class Menu(BoxLayout):
@@ -87,6 +114,17 @@ class LoadCSV(BoxLayout):
     pass
 
 
+class ProfileButton(ButtonBehavior, Image):
+    def __init__(self, wrestler: pd.Series, main_screen: MainScreen, **kwargs):
+        super().__init__(**kwargs)
+        self.wrestler = wrestler
+        self.main_screen = main_screen
+
+    def on_press(self):
+        super().on_press()
+        self.main_screen.update_content_and_show_wrestler(self.wrestler)
+
+
 class ShowParticipants(ScrollView):
 
     def __init__(self, participants_data, **kwargs):
@@ -105,9 +143,9 @@ class ShowParticipants(ScrollView):
         self.filtered_data = participants_data
         self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
         self.headers[3] = 'Age'
+        self.headers.insert(0, "Profile")
         self.text_inputs = ['' for _ in range(len(self.headers) + 2)]
         self.init_filtering_keys()
-        self.generate_layout()
 
     def init_filtering_keys(self):
         self.text_filter_keys = CONSTRAINTS['required_columns'][:-1]
@@ -115,8 +153,13 @@ class ShowParticipants(ScrollView):
         self.text_filter_keys.remove('weight')
 
     def generate_layout(self):
-        layout = GridLayout(cols=7, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
+
+        layout = GridLayout(cols=8, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
+
+        headers = [header.replace('_', ' ').title() for header in CONSTRAINTS["required_columns"][:-1]]
+        headers.insert(0, "Profile")
+
         for header in self.headers:
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
 
@@ -127,6 +170,8 @@ class ShowParticipants(ScrollView):
         self.add_widget(layout)
 
     def put_search_filters(self, layout):
+        # empty widget to make place for the "profile" column
+        layout.add_widget(Widget())
         layout.add_widget(
             TextInput(
                 hint_text="Filter Name", text=self.text_inputs[0],
@@ -187,6 +232,12 @@ class ShowParticipants(ScrollView):
         )
 
     def add_participant_labels(self, layout, participant):
+        # add a button that takes the user to the wrestler's profile
+        btn = ProfileButton(participant, self.parent.parent, source="../../resources/icons/user_in_circle_48.png")
+        anch = AnchorLayout(anchor_x='center', anchor_y='center')
+        anch.add_widget(btn)
+        layout.add_widget(anch)
+
         for label_name in self.filtered_data.columns[:-2]:
             layout.add_widget(
                 Label(
@@ -252,6 +303,44 @@ class ShowParticipants(ScrollView):
 
         self.clear_widgets()
         self.generate_layout()
+
+
+class WrestlerInfo(Label):
+    pass
+
+
+class PrettyButton(Button):
+    pass
+
+
+class WrestlerProfile(BoxLayout):
+    def __init__(self, wrestler_data: pd.Series, **kwargs):
+        super().__init__(**kwargs)
+        self.wrestler_data = wrestler_data
+
+        self.ids['name_surname'].text = "Participant: " + wrestler_data['name'] + " " + wrestler_data['surname']
+        self.ids['age_category'].text = "Age Category: " + wrestler_data['age_category']
+        self.ids['date_of_birth'].text = "Date of Birth: " + wrestler_data['date_of_birth']
+        self.ids['age'].text = "Age: " + str(wrestler_data['age'])
+        self.ids['weight_category'].text = "Weight: " + wrestler_data['weight_category']
+        self.ids['weight'].text = "Weight: " + str(wrestler_data['weight']) + " kg"
+        self.ids['country'].text = "Country: " + wrestler_data['country']
+
+        self.ids['image'].source = 'https://picsum.photos/250'
+
+        # temporary, just to check if buttons work
+        def callback(instance):
+            print("Button pressed: " + str(instance))
+        self.ids['btn_edit_profile'].bind(on_press=callback)
+        self.ids['btn_add_to_tournament'].bind(on_press=callback)
+
+
+class WrestlerSelectedStatus(AnchorLayout):
+    # to change what is shown in the gui, simply change the value of the property below
+    participation_message = StringProperty("THIS PARTICIPANT IS [b]NOT[/b] SELECTED FOR THE TOURNAMENT")
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Bracket(BoxLayout):
