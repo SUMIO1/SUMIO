@@ -32,7 +32,7 @@ class TestProfileButton:
 
 
 data_profile = {
-    'name': ['Alice'], 
+    'name': ['Alice'],
     'surname': ['Smith'],
     'age_category': ['Jr. Women'],
     'date_of_birth': ['2006-01-01'],
