@@ -45,7 +45,7 @@ class TestShowParticipants:
         assert isinstance(filter_inputs, list)
         assert len(filter_inputs) == 0
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_no_filters(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         original_participants_data = self.show_participants.participants_data
@@ -60,7 +60,7 @@ class TestShowParticipants:
         assert len(self.show_participants.filtered_data) == len(original_participants_data)
         assert self.show_participants.filtered_data.equals(original_participants_data)
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_age_range_lower_value(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -82,7 +82,7 @@ class TestShowParticipants:
         assert self.show_participants.filtered_data['age'].min() >= age_min
         assert self.show_participants.filtered_data['age'].max() <= age_max
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_age_range_upper_value(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -104,7 +104,7 @@ class TestShowParticipants:
         assert self.show_participants.filtered_data['age'].min() >= age_min
         assert self.show_participants.filtered_data['age'].max() <= age_max
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_weight_range_lower_value(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -126,7 +126,7 @@ class TestShowParticipants:
         assert self.show_participants.filtered_data['weight'].min() >= weight_min
         assert self.show_participants.filtered_data['weight'].max() <= weight_max
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_weight_range_upper_value(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -148,7 +148,7 @@ class TestShowParticipants:
         assert self.show_participants.filtered_data['weight'].min() >= weight_min
         assert self.show_participants.filtered_data['weight'].max() <= weight_max
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_age_weight(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -174,7 +174,7 @@ class TestShowParticipants:
         assert self.show_participants.filtered_data['weight'].max() <= weight_max and \
             self.show_participants.filtered_data['age'].max() <= age_max
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_negative_numeric_value(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -196,7 +196,7 @@ class TestShowParticipants:
         assert self.show_participants.filtered_data['weight'].min() >= weight_min
         assert self.show_participants.filtered_data['weight'].max() <= weight_max
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_name(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -212,7 +212,7 @@ class TestShowParticipants:
         assert len(self.show_participants.filtered_data) == len(expected_names)
         assert filtered_names == expected_names
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_surname(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -228,7 +228,7 @@ class TestShowParticipants:
         assert len(self.show_participants.filtered_data) == len(expected_surnames)
         assert filtered_surnames == expected_surnames
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_age_category(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -244,7 +244,7 @@ class TestShowParticipants:
         assert len(self.show_participants.filtered_data) == len(expected_age_categories)
         assert filtered_age_categories == expected_age_categories
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_age_category_prefix_search(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -260,7 +260,7 @@ class TestShowParticipants:
         assert len(self.show_participants.filtered_data) == len(expected_age_categories)
         assert filtered_age_categories == expected_age_categories
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_weight_category(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -276,7 +276,7 @@ class TestShowParticipants:
         assert len(self.show_participants.filtered_data) == len(expected_weight_categories)
         assert filtered_weight_categories == expected_weight_categories
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_weight_category_prefix_search(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -292,7 +292,7 @@ class TestShowParticipants:
         assert len(self.show_participants.filtered_data) == len(expected_weight_categories)
         assert filtered_weight_categories == expected_weight_categories
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_country(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -308,7 +308,7 @@ class TestShowParticipants:
         assert len(self.show_participants.filtered_data) == len(expected_countries)
         assert filtered_countries == expected_countries
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_country_prefix_search(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
         with patch.object(
@@ -324,7 +324,7 @@ class TestShowParticipants:
         assert len(self.show_participants.filtered_data) == len(expected_countries)
         assert filtered_countries == expected_countries
 
-    @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
+    @patch('src.example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_specific_participant(self, mock_add_participant_labels):
         mock_add_participant_labels.return_value = None
 
