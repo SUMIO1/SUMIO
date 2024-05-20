@@ -170,9 +170,9 @@ class TestShowParticipants:
 
         assert len(self.show_participants.filtered_data) == 1
         assert self.show_participants.filtered_data['weight'].min() >= weight_min and \
-        self.show_participants.filtered_data['age'].min() >= age_min
+            self.show_participants.filtered_data['age'].min() >= age_min
         assert self.show_participants.filtered_data['weight'].max() <= weight_max and \
-        self.show_participants.filtered_data['age'].max() <= age_max
+            self.show_participants.filtered_data['age'].max() <= age_max
 
     @patch('example_package.gui.app.ShowParticipants.add_participant_labels')
     def test_apply_filters_negative_numeric_value(self, mock_add_participant_labels):
@@ -208,7 +208,7 @@ class TestShowParticipants:
 
         filtered_names = self.show_participants.filtered_data['name'].tolist()
         expected_names = ['John']
-        
+
         assert len(self.show_participants.filtered_data) == len(expected_names)
         assert filtered_names == expected_names
 
@@ -224,7 +224,7 @@ class TestShowParticipants:
 
         filtered_surnames = self.show_participants.filtered_data['surname'].tolist()
         expected_surnames = ['Doe']
-        
+
         assert len(self.show_participants.filtered_data) == len(expected_surnames)
         assert filtered_surnames == expected_surnames
 
@@ -240,7 +240,7 @@ class TestShowParticipants:
 
         filtered_age_categories = self.show_participants.filtered_data['age_category'].tolist()
         expected_age_categories = ['Jr. Men', 'Jr. Men', 'Jr. Men', 'Jr. Men', 'Jr. Men']
-        
+
         assert len(self.show_participants.filtered_data) == len(expected_age_categories)
         assert filtered_age_categories == expected_age_categories
 
@@ -256,7 +256,7 @@ class TestShowParticipants:
 
         filtered_age_categories = self.show_participants.filtered_data['age_category'].tolist()
         expected_age_categories = ['Jr. Men', 'Jr. Men', 'Jr. Men', 'Jr. Men', 'Jr. Men', 'Jr. Women']
-        
+
         assert len(self.show_participants.filtered_data) == len(expected_age_categories)
         assert filtered_age_categories == expected_age_categories
 
@@ -272,7 +272,7 @@ class TestShowParticipants:
 
         filtered_weight_categories = self.show_participants.filtered_data['weight_category'].tolist()
         expected_weight_categories = ['Light-weight', 'Light-weight']
-        
+
         assert len(self.show_participants.filtered_data) == len(expected_weight_categories)
         assert filtered_weight_categories == expected_weight_categories
 
@@ -288,7 +288,7 @@ class TestShowParticipants:
 
         filtered_weight_categories = self.show_participants.filtered_data['weight_category'].tolist()
         expected_weight_categories = ['Middle-weight', 'Middle-weight']
-        
+
         assert len(self.show_participants.filtered_data) == len(expected_weight_categories)
         assert filtered_weight_categories == expected_weight_categories
 
@@ -304,7 +304,7 @@ class TestShowParticipants:
 
         filtered_countries = self.show_participants.filtered_data['country'].tolist()
         expected_countries = ['USA', 'USA', 'USA']
-        
+
         assert len(self.show_participants.filtered_data) == len(expected_countries)
         assert filtered_countries == expected_countries
 
@@ -320,7 +320,7 @@ class TestShowParticipants:
 
         filtered_countries = self.show_participants.filtered_data['country'].tolist()
         expected_countries = ['USA', 'UK', 'USA', 'USA', 'UK']
-        
+
         assert len(self.show_participants.filtered_data) == len(expected_countries)
         assert filtered_countries == expected_countries
 
@@ -329,15 +329,15 @@ class TestShowParticipants:
         mock_add_participant_labels.return_value = None
 
         wrestler_data = {
-        'name': 'John',
-        'surname': 'Doe',
-        'age_category': 'Jr. Men',
-        'age': 15,
-        'weight_category': 'Light-weight',
-        'weight': 70,
-        'country': 'USA'
+            'name': 'John',
+            'surname': 'Doe',
+            'age_category': 'Jr. Men',
+            'age': 15,
+            'weight_category': 'Light-weight',
+            'weight': 70,
+            'country': 'USA'
         }
-    
+
         specific_wrestler = PARTICIPANTS_DATA[
             (PARTICIPANTS_DATA['name'] == wrestler_data['name']) &
             (PARTICIPANTS_DATA['surname'] == wrestler_data['surname']) &
@@ -354,10 +354,10 @@ class TestShowParticipants:
                 return_value=['John', 'Doe', 'Jr. Men', '15', '15', 'Light-weight', '70', '70', 'USA']
         ):
             self.show_participants.apply_filters()
-        
+
         mock_add_participant_labels.assert_called_once_with(
-        mock.ANY,
-        mock.ANY
+            mock.ANY,
+            mock.ANY
         )
 
         assert len(self.show_participants.filtered_data) == len(specific_wrestler)
