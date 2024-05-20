@@ -173,6 +173,7 @@ class ShowParticipants(ScrollView):
         self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
         self.headers[3] = 'Age'
         self.headers.insert(0, "Profile")
+        self.headers.append("Add to bracket")
         self.text_inputs = ['' for _ in range(len(self.headers) + 2)]
         self.init_filtering_keys()
 
@@ -186,11 +187,7 @@ class ShowParticipants(ScrollView):
         layout = GridLayout(cols=9, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
 
-        headers = [header.replace('_', ' ').title() for header in CONSTRAINTS["required_columns"][:-1]]
-        headers.insert(0, "Profile")
-        headers.append("Add to bracket")
-
-        for header in headers:
+        for header in self.headers:
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
 
         self.visible_checkboxes = []
