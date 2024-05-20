@@ -27,7 +27,7 @@ class TestShowParticipants:
         self.show_participants = ShowParticipants(self.participants_data, self.participants_manager)
 
     def test_init_headers(self):
-        assert self.show_participants.headers == ['Profile', 'Name', 'Surname', 'Age Category', 'Age', 'Weight Category', 'Weight', 'Country']
+        assert self.show_participants.headers == ['Profile', 'Name', 'Surname', 'Age Category', 'Age', 'Weight Category', 'Weight', 'Country', 'Add to bracket']
 
     def test_init_filtering_keys(self):
         assert self.show_participants.text_filter_keys == ['name', 'surname', 'age_category', 'weight_category', 'country']
