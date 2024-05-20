@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from src.example_package.gui.app import ShowParticipants
 
 
@@ -23,7 +23,8 @@ class TestShowParticipants:
     @pytest.fixture(autouse=True)
     def setup(self):
         self.participants_data = PARTICIPANTS_DATA
-        self.show_participants = ShowParticipants(self.participants_data)
+        self.participants_manager = MagicMock()
+        self.show_participants = ShowParticipants(self.participants_data, self.participants_manager)
 
     def test_init_headers(self):
         assert self.show_participants.headers == ['Profile', 'Name', 'Surname', 'Age Category', 'Age', 'Weight Category', 'Weight', 'Country']
