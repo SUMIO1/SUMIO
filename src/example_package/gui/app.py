@@ -1,3 +1,5 @@
+from functools import partial
+
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.properties import StringProperty
@@ -6,6 +8,7 @@ from kivy.uix.behaviors import ButtonBehavior
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.uix.checkbox import CheckBox
 from kivy.uix.image import Image
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.label import Label
@@ -20,6 +23,8 @@ from src.config.constraints import CONSTRAINTS
 import pandas as pd
 
 import logging
+
+from src.example_package.gui.ParticipantsManager import ParticipantsManager
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -37,6 +42,7 @@ class MainScreen(BoxLayout):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
         self.update_content('Quick Start')
+        self.participants = ParticipantsManager()
 
     def update_content(self, item):
         content = self.ids.content
@@ -50,14 +56,17 @@ class MainScreen(BoxLayout):
                 messagebox.showerror("Error", "No data to show. Please load a CSV file.")
                 return
 
-            show_participants = ShowParticipants(self.init_dataframe(csv_reader.df))
+            show_participants = ShowParticipants(self.init_dataframe(csv_reader.df), self.participants)
             content.add_widget(show_participants)
             # until we change the way we route screens,
             # the method "generate_layout" has to be invoked after "content.add_widget(show_participants)"
             show_participants.generate_layout()
 
         elif item == 'Bracket':
-            content.add_widget(Bracket())
+            if self.participants.length() < 2 or self.participants.length() > 16:
+                messagebox.showerror("Error", "Invalid contestant number, must be between 2 and 16")
+            else:
+                content.add_widget(Bracket())
 
     def init_dataframe(self, df):
         df['age'] = df['date_of_birth'].apply(csv_reader.birthDateToAge)
@@ -74,8 +83,8 @@ class MainScreen(BoxLayout):
         content = self.ids.content
         content.clear_widgets()
 
-        wrestler_info = WrestlerProfile(wrestler_data)
-        wrestler_status = WrestlerSelectedStatus()
+        wrestler_status = WrestlerSelectedStatus(self.participants.is_selected(wrestler_data))
+        wrestler_info = WrestlerProfile(wrestler_data, wrestler_status, self.participants)
 
         box_layout = BoxLayout(orientation='vertical', spacing=40)
         box_layout.add_widget(wrestler_info)
@@ -114,6 +123,24 @@ class LoadCSV(BoxLayout):
     pass
 
 
+class LabelCheckBox(BoxLayout):
+    def __init__(self, text='', bind=None, **kwargs):
+        super(LabelCheckBox, self).__init__(**kwargs)
+        self.orientation = 'horizontal'
+
+        self.label = Label(text=text, color=(0.1294, 0.1294, 0.1294, 1))
+        self.checkbox = CheckBox(
+            color=(0.1294, 0.1294, 0.1294, 1),
+            size_hint_x=None,
+            width=10
+        )
+        if bind:
+            self.checkbox.bind(active=bind)
+
+        self.add_widget(self.checkbox)
+        self.add_widget(self.label)
+
+
 class ProfileButton(ButtonBehavior, Image):
     def __init__(self, wrestler: pd.Series, main_screen: MainScreen, **kwargs):
         super().__init__(**kwargs)
@@ -127,7 +154,7 @@ class ProfileButton(ButtonBehavior, Image):
 
 class ShowParticipants(ScrollView):
 
-    def __init__(self, participants_data, **kwargs):
+    def __init__(self, participants_data, participants_manager, **kwargs):
         super(ShowParticipants, self).__init__(**kwargs)
         self.numeric_data_info = {
             'age': {
@@ -139,8 +166,10 @@ class ShowParticipants(ScrollView):
                 'column_indices': [6, 7]
             }
         }
+        self.participants_manager = participants_manager
         self.participants_data = participants_data
         self.filtered_data = participants_data
+        self.visible_checkboxes = []
         self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
         self.headers[3] = 'Age'
         self.headers.insert(0, "Profile")
@@ -154,20 +183,36 @@ class ShowParticipants(ScrollView):
 
     def generate_layout(self):
 
-        layout = GridLayout(cols=8, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
+        layout = GridLayout(cols=9, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
         layout.bind(minimum_height=layout.setter('height'))
 
         headers = [header.replace('_', ' ').title() for header in CONSTRAINTS["required_columns"][:-1]]
         headers.insert(0, "Profile")
+        headers.append("Add to bracket")
 
-        for header in self.headers:
+        for header in headers:
             layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
 
+        self.visible_checkboxes = []
         self.put_search_filters(layout)
         for _, participant in self.filtered_data.iterrows():
             self.add_participant_labels(layout, participant)
 
         self.add_widget(layout)
+
+    def on_header_checkbox_click(self, checkbox, value):
+        if value:
+            for c in self.visible_checkboxes[:16]:
+                c.active = True
+        else:
+            for c in self.visible_checkboxes:
+                c.active = False
+
+    def on_checkbox_click(self, participant, checkbox, value):
+        if value:
+            self.participants_manager.add(participant)
+        else:
+            self.participants_manager.remove(participant)
 
     def put_search_filters(self, layout):
         # empty widget to make place for the "profile" column
@@ -230,6 +275,12 @@ class ShowParticipants(ScrollView):
                 on_text_validate=self.apply_filters, multiline=False
             )
         )
+        layout.add_widget(
+            LabelCheckBox(
+                text="(max 16)",
+                bind=self.on_header_checkbox_click
+            )
+        )
 
     def add_participant_labels(self, layout, participant):
         # add a button that takes the user to the wrestler's profile
@@ -246,6 +297,20 @@ class ShowParticipants(ScrollView):
                     color=(0.1294, 0.1294, 0.1294, 1)
                 )
             )
+        active = False
+        if self.participants_manager.is_selected(participant):
+            active = True
+
+        checkbox = CheckBox(
+            size_hint_y=None,
+            height=dp(14),
+            color=(0.1294, 0.1294, 0.1294, 1),
+            active=active
+        )
+        self.visible_checkboxes.append(checkbox)
+        check = partial(self.on_checkbox_click, participant)
+        checkbox.bind(active=check)
+        layout.add_widget(checkbox)
 
     def add_numeric_filter_range(self, key):
         input_range = [
@@ -314,7 +379,7 @@ class PrettyButton(Button):
 
 
 class WrestlerProfile(BoxLayout):
-    def __init__(self, wrestler_data: pd.Series, **kwargs):
+    def __init__(self, wrestler_data: pd.Series, wrestler_status, participants, **kwargs):
         super().__init__(**kwargs)
         self.wrestler_data = wrestler_data
 
@@ -329,18 +394,31 @@ class WrestlerProfile(BoxLayout):
         self.ids['image'].source = 'https://picsum.photos/250'
 
         # temporary, just to check if buttons work
+        def toggle_participant(button):
+            status = participants.toggle(wrestler_data)
+            wrestler_status.toggle(status)
+
         def callback(instance):
             print("Button pressed: " + str(instance))
         self.ids['btn_edit_profile'].bind(on_press=callback)
-        self.ids['btn_add_to_tournament'].bind(on_press=callback)
+        self.ids['btn_add_to_tournament'].bind(on_press=toggle_participant)
 
 
 class WrestlerSelectedStatus(AnchorLayout):
     # to change what is shown in the gui, simply change the value of the property below
     participation_message = StringProperty("THIS PARTICIPANT IS [b]NOT[/b] SELECTED FOR THE TOURNAMENT")
 
-    def __init__(self, **kwargs):
+    def __init__(self, selected, **kwargs):
         super().__init__(**kwargs)
+        self.selected = False
+        self.toggle(selected)
+
+    def toggle(self, status):
+        self.selected = status
+        if self.selected:
+            self.participation_message = "THIS PARTICIPANT IS SELECTED FOR THE TOURNAMENT"
+        else:
+            self.participation_message = "THIS PARTICIPANT IS [b]NOT[/b] SELECTED FOR THE TOURNAMENT"
 
 
 class Bracket(BoxLayout):
