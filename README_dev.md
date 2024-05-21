@@ -50,7 +50,7 @@ mypy src
 pytest
 ```
 ```
-tox
+flake8 src tests
 ```
 
 # Praca na Githubie
