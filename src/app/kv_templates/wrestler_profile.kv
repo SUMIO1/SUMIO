@@ -1,0 +1,79 @@
+<WrestlerInfo>:
+    text: "Default text"
+    color: 0.13, 0.13, 0.13, 1
+    halign: 'left'
+    valign: 'center'
+    text_size: self.size
+    size_hint_y: None
+    height: self.font_size + 3
+
+<WrestlerProfile>:
+    orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    size_hint_y: None
+    height: 440
+    AnchorLayout:
+        padding: 40
+        BoxLayout:
+            spacing: 20
+            orientation: 'vertical'
+
+            WrestlerInfo:
+                text: "[b]Participant's profile[/b]"
+                markup: True
+                font_size: 30
+            WrestlerInfo:
+                id: name_surname
+            WrestlerInfo:
+                id: age_category
+            WrestlerInfo:
+                id: date_of_birth
+            WrestlerInfo:
+                id: age
+            WrestlerInfo:
+                id: weight_category
+            WrestlerInfo:
+                id: weight
+            WrestlerInfo:
+                id: country
+            StackLayout:
+                spacing: 15
+                PrettyButton:
+                    text: "Toggle participation in tournament"
+                    id: btn_add_to_tournament
+                PrettyButton:
+                    id: btn_edit_profile
+                    text: "Edit"
+    AnchorLayout:
+        padding: 40
+        anchor_x: 'right'
+        anchor_y: 'top'
+
+        AsyncImage:
+            id: image
+            size_hint: None, None
+            size: 250, 250
+
+<WrestlerSelectedStatus>:
+    orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    size_hint: 1, None
+    height: 50
+    anchor_x: 'left'
+    anchor_y: 'center'
+
+    Label:
+        text: self.parent.participation_message
+        size: self.texture_size
+        color: 0.1, 0.1, 0.1, 1
+        markup: True

@@ -7,6 +7,7 @@ from tkinter import messagebox
 import pandas as pd
 from kivy.app import App
 from kivy.core.window import Window
+from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import StringProperty
 from kivy.resources import resource_add_path
@@ -30,7 +31,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 
 class SumioApp(App):
-    kv_file = 'app/kv_templates/app.kv'
+    # kv_file = 'app/kv_templates/app.kv'
 
     def build(self):
         Window.maximize()
@@ -423,7 +424,25 @@ class Bracket(BoxLayout):
     pass
 
 
+KV_TEMPLATES_DIR_PREFIX = "app/kv_templates"
+KV_FILE_NAMES = ["load_csv.kv", "main_screen.kv", "participants_list.kv", "pretty_button.kv", "quick_start.kv",
+                 "app.kv", "wrestler_profile.kv"]
+
 if __name__ == "__main__":
     if hasattr(sys, '_MEIPASS'):
+        # print(os.path.join(sys._MEIPASS))
         resource_add_path(os.path.join(sys._MEIPASS))
+        kv_templates_dir = os.path.join(sys._MEIPASS, KV_TEMPLATES_DIR_PREFIX)
+    else:
+        kv_templates_dir = os.path.join(os.path.curdir, KV_TEMPLATES_DIR_PREFIX)
+
+    # print(os.listdir(kv_templates_dir))
+
+    kv_paths = [os.path.join(kv_templates_dir, f) for f in KV_FILE_NAMES]
+    kv_file_paths = [f for f in kv_paths if os.path.isfile(f)]
+    # print(kv_file_paths)
+
+    for kv_file_path in kv_file_paths:
+        Builder.load_file(kv_file_path)
+
     SumioApp().run()
