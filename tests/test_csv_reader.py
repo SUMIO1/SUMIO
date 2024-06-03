@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 import copy
-from src.example_package.csv_reader.csv_reader import validateCSV, processCSV
+from app.csv_reader.csv_reader import validateCSV, processCSV
 
 
 VALID_DATA = pd.DataFrame({

@@ -1,36 +1,36 @@
+import logging
+import os
+import sys
 from functools import partial
+from tkinter import messagebox
 
+import pandas as pd
 from kivy.app import App
+from kivy.core.window import Window
 from kivy.metrics import dp
 from kivy.properties import StringProperty
+from kivy.resources import resource_add_path
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
-from kivy.uix.image import Image
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
-from tkinter import messagebox
-
 from kivy.uix.widget import Widget
 
-from src.example_package.csv_reader import csv_reader
-from src.config.constraints import CONSTRAINTS
-import pandas as pd
-
-import logging
-
-from src.example_package.gui.ParticipantsManager import ParticipantsManager
+from app.config.constraints import CONSTRAINTS
+from app.csv_reader import csv_reader
+from app.backend.ParticipantsManager import ParticipantsManager
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 class SumioApp(App):
-    kv_file = 'kivy/app.kv'
+    kv_file = 'app/kv_templates/app.kv'
 
     def build(self):
         Window.maximize()
@@ -281,7 +281,7 @@ class ShowParticipants(ScrollView):
 
     def add_participant_labels(self, layout, participant):
         # add a button that takes the user to the wrestler's profile
-        btn = ProfileButton(participant, self.parent.parent, source="../../resources/icons/user_in_circle_48.png")
+        btn = ProfileButton(participant, self.parent.parent, source="./resources/icons/user_in_circle_48.png")
         anch = AnchorLayout(anchor_x='center', anchor_y='center')
         anch.add_widget(btn)
         layout.add_widget(anch)
@@ -347,14 +347,14 @@ class ShowParticipants(ScrollView):
         self.filtered_data = self.participants_data.loc[
             (self.participants_data['age'].between(*age_input_range)) &
             (self.participants_data['weight'].between(*weight_input_range))
-        ]
+            ]
         logging.info(f"Applied age filter: {age_input_range}")
         logging.info(f"Applied weight filter: {weight_input_range}")
 
         text_filters = [
             text.strip() for i, text in enumerate(self.text_inputs)
             if i not in self.numeric_data_info['age']['column_indices']
-            and i not in self.numeric_data_info['weight']['column_indices']
+               and i not in self.numeric_data_info['weight']['column_indices']
         ]
         for i, text in enumerate(text_filters):
             if text:
@@ -397,6 +397,7 @@ class WrestlerProfile(BoxLayout):
 
         def callback(instance):
             print("Button pressed: " + str(instance))
+
         self.ids['btn_edit_profile'].bind(on_press=callback)
         self.ids['btn_add_to_tournament'].bind(on_press=toggle_participant)
 
@@ -423,4 +424,6 @@ class Bracket(BoxLayout):
 
 
 if __name__ == "__main__":
+    if hasattr(sys, '_MEIPASS'):
+        resource_add_path(os.path.join(sys._MEIPASS))
     SumioApp().run()
