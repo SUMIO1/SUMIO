@@ -16,12 +16,12 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
-from app.backend.ParticipantsManager import ParticipantsManager
-from app.config.constraints import CONSTRAINTS
-from app.csv_reader import csv_reader
-from app.gui.bracket import Bracket
-from app.gui.quick_start import QuickStart
-from app.gui.wrestler_profile import WrestlerSelectedStatus, WrestlerProfile
+from src.app.backend.ParticipantsManager import ParticipantsManager
+from src.app.config.constraints import CONSTRAINTS
+from src.app.csv_reader import csv_reader
+from src.app.gui.bracket import Bracket
+from src.app.gui.quick_start import QuickStart
+from src.app.gui.wrestler_profile import WrestlerSelectedStatus, WrestlerProfile
 
 
 class MainScreen(BoxLayout):
@@ -333,7 +333,7 @@ class ShowParticipants(ScrollView):
         text_filters = [
             text.strip() for i, text in enumerate(self.text_inputs)
             if i not in self.numeric_data_info['age']['column_indices']
-               and i not in self.numeric_data_info['weight']['column_indices']
+            and i not in self.numeric_data_info['weight']['column_indices']
         ]
         for i, text in enumerate(text_filters):
             if text:

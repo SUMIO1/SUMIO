@@ -5,7 +5,7 @@ import sys
 from kivy.lang import Builder
 from kivy.resources import resource_add_path
 
-from app.gui.app import SumioApp
+from src.app.gui.app import SumioApp
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 

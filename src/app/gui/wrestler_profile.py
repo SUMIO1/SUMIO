@@ -3,7 +3,7 @@ from kivy.properties import StringProperty
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from app.gui.pretty_button import PrettyButton
+from src.app.gui.pretty_button import PrettyButton  # noqa: F401
 
 
 class WrestlerProfile(BoxLayout):
