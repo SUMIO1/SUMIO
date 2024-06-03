@@ -1,20 +1,13 @@
 import logging
-import os
-import sys
 from functools import partial
 from tkinter import messagebox
 
 import pandas as pd
-from kivy.app import App
-from kivy.core.window import Window
-from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import StringProperty
-from kivy.resources import resource_add_path
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import Image
@@ -23,19 +16,12 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
+from app.backend.ParticipantsManager import ParticipantsManager
 from app.config.constraints import CONSTRAINTS
 from app.csv_reader import csv_reader
-from app.backend.ParticipantsManager import ParticipantsManager
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-
-class SumioApp(App):
-    # kv_file = 'app/kv_templates/app.kv'
-
-    def build(self):
-        Window.maximize()
-        return MainScreen()
+from app.gui.bracket import Bracket
+from app.gui.quick_start import QuickStart
+from app.gui.wrestler_profile import WrestlerSelectedStatus, WrestlerProfile
 
 
 class MainScreen(BoxLayout):
@@ -113,14 +99,6 @@ class MenuItem(BoxLayout):
 
 
 class Content(BoxLayout):
-    pass
-
-
-class QuickStart(BoxLayout):
-    pass
-
-
-class LoadCSV(BoxLayout):
     pass
 
 
@@ -366,83 +344,3 @@ class ShowParticipants(ScrollView):
 
         self.clear_widgets()
         self.generate_layout()
-
-
-class WrestlerInfo(Label):
-    pass
-
-
-class PrettyButton(Button):
-    pass
-
-
-class WrestlerProfile(BoxLayout):
-    def __init__(self, wrestler_data: pd.Series, wrestler_status, participants, **kwargs):
-        super().__init__(**kwargs)
-        self.wrestler_data = wrestler_data
-
-        self.ids['name_surname'].text = "Participant: " + wrestler_data['name'] + " " + wrestler_data['surname']
-        self.ids['age_category'].text = "Age Category: " + wrestler_data['age_category']
-        self.ids['date_of_birth'].text = "Date of Birth: " + wrestler_data['date_of_birth']
-        self.ids['age'].text = "Age: " + str(wrestler_data['age'])
-        self.ids['weight_category'].text = "Weight: " + wrestler_data['weight_category']
-        self.ids['weight'].text = "Weight: " + str(wrestler_data['weight']) + " kg"
-        self.ids['country'].text = "Country: " + wrestler_data['country']
-
-        self.ids['image'].source = 'https://picsum.photos/250'
-
-        # temporary, just to check if buttons work
-        def toggle_participant(button):
-            status = participants.toggle(wrestler_data)
-            wrestler_status.toggle(status)
-
-        def callback(instance):
-            print("Button pressed: " + str(instance))
-
-        self.ids['btn_edit_profile'].bind(on_press=callback)
-        self.ids['btn_add_to_tournament'].bind(on_press=toggle_participant)
-
-
-class WrestlerSelectedStatus(AnchorLayout):
-    # to change what is shown in the gui, simply change the value of the property below
-    participation_message = StringProperty("THIS PARTICIPANT IS [b]NOT[/b] SELECTED FOR THE TOURNAMENT")
-
-    def __init__(self, selected, **kwargs):
-        super().__init__(**kwargs)
-        self.selected = False
-        self.toggle(selected)
-
-    def toggle(self, status):
-        self.selected = status
-        if self.selected:
-            self.participation_message = "THIS PARTICIPANT IS SELECTED FOR THE TOURNAMENT"
-        else:
-            self.participation_message = "THIS PARTICIPANT IS [b]NOT[/b] SELECTED FOR THE TOURNAMENT"
-
-
-class Bracket(BoxLayout):
-    pass
-
-
-KV_TEMPLATES_DIR_PREFIX = "app/kv_templates"
-KV_FILE_NAMES = ["load_csv.kv", "main_screen.kv", "participants_list.kv", "pretty_button.kv", "quick_start.kv",
-                 "app.kv", "wrestler_profile.kv"]
-
-if __name__ == "__main__":
-    if hasattr(sys, '_MEIPASS'):
-        # print(os.path.join(sys._MEIPASS))
-        resource_add_path(os.path.join(sys._MEIPASS))
-        kv_templates_dir = os.path.join(sys._MEIPASS, KV_TEMPLATES_DIR_PREFIX)
-    else:
-        kv_templates_dir = os.path.join(os.path.curdir, KV_TEMPLATES_DIR_PREFIX)
-
-    # print(os.listdir(kv_templates_dir))
-
-    kv_paths = [os.path.join(kv_templates_dir, f) for f in KV_FILE_NAMES]
-    kv_file_paths = [f for f in kv_paths if os.path.isfile(f)]
-    # print(kv_file_paths)
-
-    for kv_file_path in kv_file_paths:
-        Builder.load_file(kv_file_path)
-
-    SumioApp().run()
