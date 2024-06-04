@@ -1,40 +1,27 @@
+import logging
 from functools import partial
+from tkinter import messagebox
 
-from kivy.app import App
+import pandas as pd
 from kivy.metrics import dp
 from kivy.properties import StringProperty
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
-from kivy.uix.image import Image
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
+from kivy.uix.label import Label
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
-from tkinter import messagebox
-
 from kivy.uix.widget import Widget
 
-from src.example_package.csv_reader import csv_reader
-from src.config.constraints import CONSTRAINTS
-import pandas as pd
-
-import logging
-
-from src.example_package.gui.ParticipantsManager import ParticipantsManager
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-
-class SumioApp(App):
-    kv_file = 'kivy/app.kv'
-
-    def build(self):
-        Window.maximize()
-        return MainScreen()
+from src.app.backend.ParticipantsManager import ParticipantsManager
+from src.app.config.constraints import CONSTRAINTS
+from src.app.csv_reader import csv_reader
+from src.app.gui.bracket import Bracket
+from src.app.gui.quick_start import QuickStart
+from src.app.gui.wrestler_profile import WrestlerSelectedStatus, WrestlerProfile
 
 
 class MainScreen(BoxLayout):
@@ -112,14 +99,6 @@ class MenuItem(BoxLayout):
 
 
 class Content(BoxLayout):
-    pass
-
-
-class QuickStart(BoxLayout):
-    pass
-
-
-class LoadCSV(BoxLayout):
     pass
 
 
@@ -281,7 +260,7 @@ class ShowParticipants(ScrollView):
 
     def add_participant_labels(self, layout, participant):
         # add a button that takes the user to the wrestler's profile
-        btn = ProfileButton(participant, self.parent.parent, source="../../resources/icons/user_in_circle_48.png")
+        btn = ProfileButton(participant, self.parent.parent, source="./resources/icons/user_in_circle_48.png")
         anch = AnchorLayout(anchor_x='center', anchor_y='center')
         anch.add_widget(btn)
         layout.add_widget(anch)
@@ -347,7 +326,7 @@ class ShowParticipants(ScrollView):
         self.filtered_data = self.participants_data.loc[
             (self.participants_data['age'].between(*age_input_range)) &
             (self.participants_data['weight'].between(*weight_input_range))
-        ]
+            ]
         logging.info(f"Applied age filter: {age_input_range}")
         logging.info(f"Applied weight filter: {weight_input_range}")
 
@@ -365,62 +344,3 @@ class ShowParticipants(ScrollView):
 
         self.clear_widgets()
         self.generate_layout()
-
-
-class WrestlerInfo(Label):
-    pass
-
-
-class PrettyButton(Button):
-    pass
-
-
-class WrestlerProfile(BoxLayout):
-    def __init__(self, wrestler_data: pd.Series, wrestler_status, participants, **kwargs):
-        super().__init__(**kwargs)
-        self.wrestler_data = wrestler_data
-
-        self.ids['name_surname'].text = "Participant: " + wrestler_data['name'] + " " + wrestler_data['surname']
-        self.ids['age_category'].text = "Age Category: " + wrestler_data['age_category']
-        self.ids['date_of_birth'].text = "Date of Birth: " + wrestler_data['date_of_birth']
-        self.ids['age'].text = "Age: " + str(wrestler_data['age'])
-        self.ids['weight_category'].text = "Weight: " + wrestler_data['weight_category']
-        self.ids['weight'].text = "Weight: " + str(wrestler_data['weight']) + " kg"
-        self.ids['country'].text = "Country: " + wrestler_data['country']
-
-        self.ids['image'].source = 'https://picsum.photos/250'
-
-        # temporary, just to check if buttons work
-        def toggle_participant(button):
-            status = participants.toggle(wrestler_data)
-            wrestler_status.toggle(status)
-
-        def callback(instance):
-            print("Button pressed: " + str(instance))
-        self.ids['btn_edit_profile'].bind(on_press=callback)
-        self.ids['btn_add_to_tournament'].bind(on_press=toggle_participant)
-
-
-class WrestlerSelectedStatus(AnchorLayout):
-    # to change what is shown in the gui, simply change the value of the property below
-    participation_message = StringProperty("THIS PARTICIPANT IS [b]NOT[/b] SELECTED FOR THE TOURNAMENT")
-
-    def __init__(self, selected, **kwargs):
-        super().__init__(**kwargs)
-        self.selected = False
-        self.toggle(selected)
-
-    def toggle(self, status):
-        self.selected = status
-        if self.selected:
-            self.participation_message = "THIS PARTICIPANT IS SELECTED FOR THE TOURNAMENT"
-        else:
-            self.participation_message = "THIS PARTICIPANT IS [b]NOT[/b] SELECTED FOR THE TOURNAMENT"
-
-
-class Bracket(BoxLayout):
-    pass
-
-
-if __name__ == "__main__":
-    SumioApp().run()
