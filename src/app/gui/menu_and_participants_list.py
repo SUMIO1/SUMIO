@@ -2,6 +2,7 @@ from collections import defaultdict
 import logging
 from functools import partial
 from tkinter import messagebox
+from typing import DefaultDict, Any
 
 import pandas as pd
 from kivy.metrics import dp
@@ -29,44 +30,57 @@ class MainScreen(BoxLayout):
 
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        self.update_content('Quick Start')
+        self.update_content("Quick Start")
         self.participants = ParticipantsManager()
-        self.labels = defaultdict(lambda: None)
+        self.labels: DefaultDict[Any, None] = defaultdict(lambda: None)
 
     def update_content(self, item):
         content = self.ids.content
         content.clear_widgets()
-        if item == 'Quick Start':
+        if item == "Quick Start":
             content.add_widget(QuickStart())
-        elif item == 'Load CSV file':
+        elif item == "Load CSV file":
             csv_reader.readCSV()
-        elif item == 'Show participants':
+        elif item == "Show participants":
             if csv_reader.df is None:
-                messagebox.showerror("Error", "No data to show. Please load a CSV file.")
+                messagebox.showerror(
+                    "Error", "No data to show. Please load a CSV file."
+                )
                 return
             if len(self.labels):
-                messagebox.showerror("Error", "The tournament that has started has ended.")
+                messagebox.showerror(
+                    "Error", "The tournament that has started has ended."
+                )
                 self.labels = defaultdict(lambda: None)
                 self.participants = ParticipantsManager()
 
-            show_participants = ShowParticipants(self.init_dataframe(csv_reader.df), self.participants)
+            show_participants = ShowParticipants(
+                self.init_dataframe(csv_reader.df), self.participants
+            )
             content.add_widget(show_participants)
             # until we change the way we route screens,
             # the method "generate_layout" has to be invoked after "content.add_widget(show_participants)"
             show_participants.generate_layout()
 
-        elif item == 'Bracket':
+        elif item == "Bracket":
             if 16 >= len(self.participants.chosen_participants) >= 2:
-                result = messagebox.askyesno("Confirmation", "Do you want to generate a bracket?")
+                result = messagebox.askyesno(
+                    "Confirmation", "Do you want to generate a bracket?"
+                )
                 if result:
-                    content.add_widget(TabbedCompetition(self.participants.chosen_participants, labels=self.labels))
+                    content.add_widget(
+                        TabbedCompetition(
+                            self.participants.chosen_participants, labels=self.labels
+                        )
+                    )
 
             elif len(self.participants.chosen_participants) < 2:
                 messagebox.showerror("Error", "Check at least two participants")
             else:
                 messagebox.showerror("Error", "Check up to twelve participants")
+
     def init_dataframe(self, df):
-        df['age'] = df['date_of_birth'].apply(csv_reader.birthDateToAge)
+        df["age"] = df["date_of_birth"].apply(csv_reader.birthDateToAge)
         df = self.swap_df_columns(df, 3, 8)
         return df
 
@@ -80,10 +94,14 @@ class MainScreen(BoxLayout):
         content = self.ids.content
         content.clear_widgets()
 
-        wrestler_status = WrestlerSelectedStatus(self.participants.is_selected(wrestler_data))
-        wrestler_info = WrestlerProfile(wrestler_data, wrestler_status, self.participants)
+        wrestler_status = WrestlerSelectedStatus(
+            self.participants.is_selected(wrestler_data)
+        )
+        wrestler_info = WrestlerProfile(
+            wrestler_data, wrestler_status, self.participants
+        )
 
-        box_layout = BoxLayout(orientation='vertical', spacing=40)
+        box_layout = BoxLayout(orientation="vertical", spacing=40)
         box_layout.add_widget(wrestler_info)
         box_layout.add_widget(wrestler_status)
         box_layout.add_widget(BoxLayout())
@@ -101,7 +119,7 @@ class MenuItem(BoxLayout):
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
-            if touch.button == 'left':
+            if touch.button == "left":
                 root = self.parent.parent
                 root.update_content(self.text1)
                 return True
@@ -113,15 +131,13 @@ class Content(BoxLayout):
 
 
 class LabelCheckBox(BoxLayout):
-    def __init__(self, text='', bind=None, **kwargs):
+    def __init__(self, text="", bind=None, **kwargs):
         super(LabelCheckBox, self).__init__(**kwargs)
-        self.orientation = 'horizontal'
+        self.orientation = "horizontal"
 
         self.label = Label(text=text, color=(0.1294, 0.1294, 0.1294, 1))
         self.checkbox = CheckBox(
-            color=(0.1294, 0.1294, 0.1294, 1),
-            size_hint_x=None,
-            width=10
+            color=(0.1294, 0.1294, 0.1294, 1), size_hint_x=None, width=10
         )
         if bind:
             self.checkbox.bind(active=bind)
@@ -146,38 +162,53 @@ class ShowParticipants(ScrollView):
     def __init__(self, participants_data, participants_manager, **kwargs):
         super(ShowParticipants, self).__init__(**kwargs)
         self.numeric_data_info = {
-            'age': {
-                'constraints': (0, CONSTRAINTS['age_categories']['Men']['max_age']),
-                'column_indices': [3, 4]
+            "age": {
+                "constraints": (0, CONSTRAINTS["age_categories"]["Men"]["max_age"]),
+                "column_indices": [3, 4],
             },
-            'weight': {
-                'constraints': (0, CONSTRAINTS['age_categories']['Men']['Heavy-weight']['max']),
-                'column_indices': [6, 7]
-            }
+            "weight": {
+                "constraints": (
+                    0,
+                    CONSTRAINTS["age_categories"]["Men"]["Heavy-weight"]["max"],
+                ),
+                "column_indices": [6, 7],
+            },
         }
         self.participants_manager = participants_manager
         self.participants_data = participants_data
         self.filtered_data = participants_data
         self.visible_checkboxes = []
-        self.headers = [header.replace('_', ' ').title() for header in CONSTRAINTS['required_columns'][:-1]]
-        self.headers[3] = 'Age'
+        self.headers = [
+            header.replace("_", " ").title()
+            for header in CONSTRAINTS["required_columns"][:-1]
+        ]
+        self.headers[3] = "Age"
         self.headers.insert(0, "Profile")
         self.headers.append("Add to bracket")
-        self.text_inputs = ['' for _ in range(len(self.headers) + 2)]
+        self.text_inputs = ["" for _ in range(len(self.headers) + 2)]
         self.init_filtering_keys()
 
     def init_filtering_keys(self):
-        self.text_filter_keys = CONSTRAINTS['required_columns'][:-1]
-        self.text_filter_keys.remove('date_of_birth')
-        self.text_filter_keys.remove('weight')
+        self.text_filter_keys = CONSTRAINTS["required_columns"][:-1]
+        self.text_filter_keys.remove("date_of_birth")
+        self.text_filter_keys.remove("weight")
 
     def generate_layout(self):
 
-        layout = GridLayout(cols=9, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)])
-        layout.bind(minimum_height=layout.setter('height'))
+        layout = GridLayout(
+            cols=9, spacing=26, size_hint_y=None, padding=[dp(20), dp(20)]
+        )
+        layout.bind(minimum_height=layout.setter("height"))
 
         for header in self.headers:
-            layout.add_widget(Label(text=header, bold=True, font_size=14, color=(0.1294, 0.1294, 0.1294, 1)))
+            layout.add_widget(
+                Label(
+                    text=header,
+                    bold=True,
+                    font_size=14,
+                    color=(0.1294, 0.1294, 0.1294, 1),
+                )
+            )
 
         self.visible_checkboxes = []
         self.put_search_filters(layout)
@@ -205,73 +236,92 @@ class ShowParticipants(ScrollView):
         layout.add_widget(Widget())
         layout.add_widget(
             TextInput(
-                hint_text="Filter Name", text=self.text_inputs[0],
-                on_text_validate=self.apply_filters, multiline=False
+                hint_text="Filter Name",
+                text=self.text_inputs[0],
+                on_text_validate=self.apply_filters,
+                multiline=False,
             )
         )
         layout.add_widget(
             TextInput(
-                hint_text="Filter Surname", text=self.text_inputs[1],
-                on_text_validate=self.apply_filters, multiline=False
+                hint_text="Filter Surname",
+                text=self.text_inputs[1],
+                on_text_validate=self.apply_filters,
+                multiline=False,
             )
         )
         layout.add_widget(
             TextInput(
-                hint_text="Filter Age Cat.", text=self.text_inputs[2],
-                on_text_validate=self.apply_filters, multiline=False
+                hint_text="Filter Age Cat.",
+                text=self.text_inputs[2],
+                on_text_validate=self.apply_filters,
+                multiline=False,
             )
         )
         age_layout = GridLayout(cols=2, spacing=5)
         age_layout.add_widget(
             TextInput(
-                hint_text="Min", text=str(self.text_inputs[3]),
-                on_text_validate=self.apply_filters, multiline=False
+                hint_text="Min",
+                text=str(self.text_inputs[3]),
+                on_text_validate=self.apply_filters,
+                multiline=False,
             )
         )
         age_layout.add_widget(
             TextInput(
-                hint_text="Max", text=str(self.text_inputs[4]),
-                on_text_validate=self.apply_filters, multiline=False
+                hint_text="Max",
+                text=str(self.text_inputs[4]),
+                on_text_validate=self.apply_filters,
+                multiline=False,
             )
         )
         layout.add_widget(age_layout)
         layout.add_widget(
             TextInput(
-                hint_text="Filter Weight Cat.", text=self.text_inputs[5],
-                on_text_validate=self.apply_filters, multiline=False
+                hint_text="Filter Weight Cat.",
+                text=self.text_inputs[5],
+                on_text_validate=self.apply_filters,
+                multiline=False,
             )
         )
         weight_layout = GridLayout(cols=2, spacing=5)
         weight_layout.add_widget(
             TextInput(
-                hint_text="Min", text=str(self.text_inputs[6]),
-                on_text_validate=self.apply_filters, multiline=False
+                hint_text="Min",
+                text=str(self.text_inputs[6]),
+                on_text_validate=self.apply_filters,
+                multiline=False,
             )
         )
         weight_layout.add_widget(
             TextInput(
-                hint_text="Max", text=str(self.text_inputs[7]),
-                on_text_validate=self.apply_filters, multiline=False
+                hint_text="Max",
+                text=str(self.text_inputs[7]),
+                on_text_validate=self.apply_filters,
+                multiline=False,
             )
         )
         layout.add_widget(weight_layout)
         layout.add_widget(
             TextInput(
-                hint_text="Filter Country", text=self.text_inputs[8],
-                on_text_validate=self.apply_filters, multiline=False
+                hint_text="Filter Country",
+                text=self.text_inputs[8],
+                on_text_validate=self.apply_filters,
+                multiline=False,
             )
         )
         layout.add_widget(
-            LabelCheckBox(
-                text="(max 16)",
-                bind=self.on_header_checkbox_click
-            )
+            LabelCheckBox(text="(max 16)", bind=self.on_header_checkbox_click)
         )
 
     def add_participant_labels(self, layout, participant):
         # add a button that takes the user to the wrestler's profile
-        btn = ProfileButton(participant, self.parent.parent, source="./resources/icons/user_in_circle_48.png")
-        anch = AnchorLayout(anchor_x='center', anchor_y='center')
+        btn = ProfileButton(
+            participant,
+            self.parent.parent,
+            source="./resources/icons/user_in_circle_48.png",
+        )
+        anch = AnchorLayout(anchor_x="center", anchor_y="center")
         anch.add_widget(btn)
         layout.add_widget(anch)
 
@@ -280,7 +330,7 @@ class ShowParticipants(ScrollView):
                 Label(
                     text=str(participant[label_name]),
                     font_size=12,
-                    color=(0.1294, 0.1294, 0.1294, 1)
+                    color=(0.1294, 0.1294, 0.1294, 1),
                 )
             )
         active = False
@@ -291,7 +341,7 @@ class ShowParticipants(ScrollView):
             size_hint_y=None,
             height=dp(14),
             color=(0.1294, 0.1294, 0.1294, 1),
-            active=active
+            active=active,
         )
         self.visible_checkboxes.append(checkbox)
         check = partial(self.on_checkbox_click, participant)
@@ -299,11 +349,8 @@ class ShowParticipants(ScrollView):
         layout.add_widget(checkbox)
 
     def add_numeric_filter_range(self, key):
-        input_range = [
-            self.numeric_data_info[key]['constraints'][0],
-            100000
-        ]
-        for i, val in enumerate(self.numeric_data_info[key]['column_indices']):
+        input_range = [self.numeric_data_info[key]["constraints"][0], 100000]
+        for i, val in enumerate(self.numeric_data_info[key]["column_indices"]):
             data_val = self.text_inputs[val]
             if not data_val or not data_val.isnumeric():
                 continue
@@ -330,28 +377,32 @@ class ShowParticipants(ScrollView):
 
     def apply_filters(self, *args):
         self.text_inputs = self.get_filter_inputs()
-        age_input_range = self.add_numeric_filter_range('age')
-        weight_input_range = self.add_numeric_filter_range('weight')
+        age_input_range = self.add_numeric_filter_range("age")
+        weight_input_range = self.add_numeric_filter_range("weight")
 
         self.filtered_data = self.participants_data.loc[
-            (self.participants_data['age'].between(*age_input_range)) &
-            (self.participants_data['weight'].between(*weight_input_range))
-            ]
+            (self.participants_data["age"].between(*age_input_range))
+            & (self.participants_data["weight"].between(*weight_input_range))
+        ]
         logging.info(f"Applied age filter: {age_input_range}")
         logging.info(f"Applied weight filter: {weight_input_range}")
 
         text_filters = [
-            text.strip() for i, text in enumerate(self.text_inputs)
-            if i not in self.numeric_data_info['age']['column_indices']
-               and i not in self.numeric_data_info['weight']['column_indices']
+            text.strip()
+            for i, text in enumerate(self.text_inputs)
+            if i not in self.numeric_data_info["age"]["column_indices"]
+            and i not in self.numeric_data_info["weight"]["column_indices"]
         ]
         for i, text in enumerate(text_filters):
             if text:
                 self.filtered_data = self.filtered_data.loc[
-                    (self.participants_data[self.text_filter_keys[i]].str.lower().str.contains(text.lower()))
+                    (
+                        self.participants_data[self.text_filter_keys[i]]
+                        .str.lower()
+                        .str.contains(text.lower())
+                    )
                 ]
         logging.info(f"Applied text filters: {text_filters}")
 
         self.clear_widgets()
         self.generate_layout()
-
