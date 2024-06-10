@@ -17,6 +17,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
+from app.gui.tournament_view import TournamentView
 from src.app.backend.tournament_manager import TournamentManager
 from src.app.backend.participants_manager import ParticipantsManager
 from src.app.config.constraints import CONSTRAINTS
@@ -82,6 +83,17 @@ class MainScreen(BoxLayout):
                 messagebox.showerror("Error", "Check at least two participants")
             else:
                 messagebox.showerror("Error", "Check up to twelve participants")
+
+        elif item == "Tournament":
+            if not self.tournament_manager:
+                messagebox.showerror("Tournament cannot be started. Generate a bracket first")
+                return
+            self.tournament_manager.start_the_tournament()
+            content.add_widget(
+                TournamentView()
+            )
+
+
 
     def init_dataframe(self, df):
         df["age"] = df["date_of_birth"].apply(csv_reader.birthDateToAge)
