@@ -1,8 +1,7 @@
-from collections import defaultdict
 import logging
 from functools import partial
 from tkinter import messagebox
-from typing import DefaultDict, Any
+from typing import Optional
 
 import pandas as pd
 from kivy.metrics import dp
@@ -18,7 +17,8 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
-from src.app.backend.ParticipantsManager import ParticipantsManager
+from src.app.backend.tournament_manager import TournamentManager
+from src.app.backend.participants_manager import ParticipantsManager
 from src.app.config.constraints import CONSTRAINTS
 from src.app.csv_reader import csv_reader
 from src.app.gui.bracket import TabbedCompetition
@@ -32,7 +32,7 @@ class MainScreen(BoxLayout):
         super(MainScreen, self).__init__(**kwargs)
         self.update_content("Quick Start")
         self.participants = ParticipantsManager()
-        self.labels: DefaultDict[Any, None] = defaultdict(lambda: None)
+        self.tournament_manager: Optional[TournamentManager] = None
 
     def update_content(self, item):
         content = self.ids.content
@@ -40,18 +40,21 @@ class MainScreen(BoxLayout):
         if item == "Quick Start":
             content.add_widget(QuickStart())
         elif item == "Load CSV file":
-            csv_reader.readCSV()
+            result = csv_reader.readCSV()
+            if result:
+                self.update_content("Show participants")
+
         elif item == "Show participants":
             if csv_reader.df is None:
                 messagebox.showerror(
                     "Error", "No data to show. Please load a CSV file."
                 )
                 return
-            if len(self.labels):
-                messagebox.showerror(
-                    "Error", "The tournament that has started has ended."
+            if self.tournament_manager:
+                messagebox.showwarning(
+                    "Tournament interrupted", "The tournament that had started has been interrupted."
                 )
-                self.labels = defaultdict(lambda: None)
+                self.tournament_manager = None
                 self.participants = ParticipantsManager()
 
             show_participants = ShowParticipants(
@@ -68,9 +71,10 @@ class MainScreen(BoxLayout):
                     "Confirmation", "Do you want to generate a bracket?"
                 )
                 if result:
+                    self.tournament_manager = TournamentManager(self.participants.chosen_participants)
                     content.add_widget(
                         TabbedCompetition(
-                            self.participants.chosen_participants, labels=self.labels
+                            self.tournament_manager
                         )
                     )
 

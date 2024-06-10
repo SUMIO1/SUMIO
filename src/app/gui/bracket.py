@@ -2,31 +2,27 @@ from collections import defaultdict
 from typing import DefaultDict, Dict
 
 from kivy.uix.image import Image
-from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.tabbedpanel import TabbedPanelItem
-from kivy.graphics import Color, Rectangle
 
-import pandas as pd
-import numpy as np
+from src.app.backend.tournament_manager import TournamentManager
+from src.app.gui.background_label import BackgroundLabel
 
 
 class TabbedCompetition(TabbedPanel):
     def __init__(
-        self,
-        participants_dataframe: pd.DataFrame,
-        labels: DefaultDict[str, Label],
-        **kwargs,
+            self,
+            tournament_manager: TournamentManager,
+            **kwargs,
     ):
         super(TabbedCompetition, self).__init__(**kwargs)
-
-        self.labels: DefaultDict[str, Label] = labels
+        self.tournament_manager = tournament_manager
 
         self.regular_bracket_tab = TabbedPanelItem(text="Bracket")
         self.regular_bracket_tab.add_widget(
             CompetitionBracket(
-                participants_dataframe=participants_dataframe, labels=self.labels
+                tournament_manager=tournament_manager
             )
         )
         self.add_widget(self.regular_bracket_tab)
@@ -34,8 +30,7 @@ class TabbedCompetition(TabbedPanel):
         self.repechage_bracket_tab = TabbedPanelItem(text="Repechage")
         self.repechage_bracket_tab.add_widget(
             CompetitionBracket(
-                participants_dataframe=participants_dataframe,
-                labels=self.labels,
+                tournament_manager=tournament_manager,
                 repechage=True,
             )
         )
@@ -44,18 +39,16 @@ class TabbedCompetition(TabbedPanel):
 
 class CompetitionBracket(FloatLayout):
     def __init__(
-        self,
-        participants_dataframe: pd.DataFrame,
-        labels: DefaultDict[str, Label],
-        repechage: bool = False,
-        **kwargs,
+            self,
+            tournament_manager: TournamentManager,
+            repechage: bool = False,
+            **kwargs,
     ):
         super(CompetitionBracket, self).__init__(**kwargs)
-        competitors_no = len(participants_dataframe)
+        self.tournament_manager = tournament_manager
+        competitors_no = tournament_manager.get_num_of_competitors()
 
-        self.participants_dataframe = participants_dataframe
         self.repechage = repechage
-        self.labels = labels
 
         if self.repechage:
             if competitors_no == 2:
@@ -126,33 +119,26 @@ class CompetitionBracket(FloatLayout):
         self.add_widget(self.background_image)
         self.background_image.bind(size=self.update_labels)
 
-        if 5 <= competitors_no <= 8:
-            if not ("contestant_no" in self.participants_dataframe):
-                random_permutation = np.array(
-                    [*range(1, len(self.participants_dataframe) + 1)]
-                )
-                np.random.shuffle(random_permutation)
-                self.participants_dataframe.insert(
-                    0, "contestant_no", random_permutation
-                )
-                self.participants_dataframe = self.participants_dataframe.sort_values(
-                    by=["contestant_no"]
-                )
+        self.update_labels()
 
-            if len(self.labels) == 0:
-                self.create_competitors_labels()
-            self.update_labels()
+    def update_labels(self, *args):
+        self.clear_widgets()
+        self.add_widget(self.background_image)
+        labels = self.tournament_manager.get_contestants_tree(self.repechage)
 
-    def create_competitors_labels(self):
-        for i in range(1, 9):
-            bracket = (i + 1) // 2
-            position = 1 if i % 2 else 2
+        center_x = self.width / 2
+        center_y = self.height / 2
+        left_bottom_x, left_bottom_y = self.to_window(self.x, self.y)
 
-            if len(self.participants_dataframe) > i - 1:
+        for key, contestant in labels.items():
+            pos = self.positions[key]
+
+            label = None
+            if contestant is not None:
                 text = (
-                    self.participants_dataframe["name"].iloc[i - 1]
-                    + "\n"
-                    + self.participants_dataframe["surname"].iloc[i - 1]
+                        contestant["name"]
+                        + "\n"
+                        + contestant["surname"]
                 )
 
                 label = BackgroundLabel(
@@ -161,45 +147,15 @@ class CompetitionBracket(FloatLayout):
                     size_hint=(None, None),
                     size=(162, 52),
                 )
-                self.labels[f"b1_{bracket}_{position}"] = label
-                self.add_widget(label)
 
             else:
                 label = BackgroundLabel(
                     text="-", color=(0, 0, 0, 1), size_hint=(None, None), size=(162, 52)
                 )
-                self.labels[f"b1_{bracket}_{position}"] = label
-                self.add_widget(label)
 
-    def update_labels(self, *args):
+            label.pos = (
+                left_bottom_x + center_x + pos["x"],
+                left_bottom_y + center_y + pos["y"],
+            )
 
-        center_x = self.width / 2
-        center_y = self.height / 2
-        left_bottom_x, left_bottom_y = self.to_window(self.x, self.y)
-
-        repechage = "r" if self.repechage else "b"
-        for level in range(1, 4):
-            for bracket in range(1, 5):
-                for position in range(1, 3):
-                    label = self.labels[f"{repechage}{level}_{bracket}_{position}"]
-                    pos = self.positions[f"{repechage}{level}_{bracket}_{position}"]
-
-                    if label and pos:
-                        label.pos = (
-                            left_bottom_x + center_x + pos["x"],
-                            left_bottom_y + center_y + pos["y"],
-                        )
-
-
-class BackgroundLabel(Label):
-    def __init__(self, bg_color: tuple[float, ...] = (0, 0, 0, 0), **kwargs):
-        super(BackgroundLabel, self).__init__(**kwargs)
-        self.bind(pos=self.update_rect, size=self.update_rect)
-
-        with self.canvas.before:
-            Color(rgba=bg_color)
-            self.rect = Rectangle(size=self.size, pos=self.pos)
-
-    def update_rect(self, *args):
-        self.rect.pos = self.pos
-        self.rect.size = self.size
+            self.add_widget(label)
