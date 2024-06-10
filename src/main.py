@@ -7,12 +7,14 @@ from kivy.resources import resource_add_path
 
 from src.app.gui.app import SumioApp
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 KV_TEMPLATES_DIR_PREFIX = "app/kv_templates"
 
 if __name__ == "__main__":
-    if hasattr(sys, '_MEIPASS'):
+    if hasattr(sys, "_MEIPASS"):
         # print(os.path.join(sys._MEIPASS))
         resource_add_path(os.path.join(sys._MEIPASS))
         kv_templates_dir = os.path.join(sys._MEIPASS, KV_TEMPLATES_DIR_PREFIX)
