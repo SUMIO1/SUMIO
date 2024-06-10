@@ -35,6 +35,9 @@ class TournamentManager:
             by=["contestant_no"]
         )
 
+    def swap_contestants(self, key1, key2):
+        self.contestants_in_the_normal_tree[key1], self.contestants_in_the_normal_tree[key2] = self.contestants_in_the_normal_tree[key2], self.contestants_in_the_normal_tree[key1]
+
     # point to the winner by giving their level, bracket and participant number
     def designate_a_winner(self, level: int, bracket: int, participant: int):
         winner_key = f"b{level}_{bracket}_{participant}"
