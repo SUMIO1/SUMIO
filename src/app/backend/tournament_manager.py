@@ -28,6 +28,7 @@ class TournamentManager:
             [*range(1, len(self.contestants) + 1)]
         )
         np.random.shuffle(random_permutation)
+
         self.contestants.insert(
             0, "contestant_no", random_permutation
         )

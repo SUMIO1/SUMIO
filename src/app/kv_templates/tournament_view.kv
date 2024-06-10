@@ -1,5 +1,49 @@
-<TournamentView>:
-    Label:
-        text: "haha"
-    Label:
-        text: "hihi"
+<TournamentFight>:
+    orientation: 'vertical'
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    size_hint_y: None
+    height: 440
+#    AnchorLayout:
+#        padding: 40
+#        canvas.before:
+#        Color:
+#            rgba: 1, 0, 0.5, 1
+#        Rectangle:
+#            size: self.size
+#            pos: self.pos
+#        BoxLayout:
+#            spacing: 20
+#            canvas.before:
+#                Color:
+#                    rgba: 0.5, 1, 0, 1
+#                Rectangle:
+#                    size: self.size
+#                    pos: self.pos
+#            orientation: 'vertical'
+#
+#            Label:
+#                text: "labelll"
+
+<NextFightPreview>:
+    orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    size_hint_y: None
+    height: 50
+#    anchor_x: 'left'
+#    anchor_y: 'center'
+#
+#    Label:
+#        text: self.parent.participation_message
+#        size: self.texture_size
+#        color: 0.1, 0.1, 0.1, 1
+#        markup: True

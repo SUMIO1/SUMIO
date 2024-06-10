@@ -17,7 +17,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
-from app.gui.tournament_view import TournamentView
+from app.gui.tournament_view import NextFightPreview, TournamentFight
 from src.app.backend.tournament_manager import TournamentManager
 from src.app.backend.participants_manager import ParticipantsManager
 from src.app.config.constraints import CONSTRAINTS
@@ -66,32 +66,39 @@ class MainScreen(BoxLayout):
             # the method "generate_layout" has to be invoked after "content.add_widget(show_participants)"
             show_participants.generate_layout()
 
+            self.tournament_manager = None
+
         elif item == "Bracket":
-            if 16 >= len(self.participants.chosen_participants) >= 2:
+            if not self.tournament_manager and 16 >= len(self.participants.chosen_participants) >= 2:
                 result = messagebox.askyesno(
                     "Confirmation", "Do you want to generate a bracket?"
                 )
                 if result:
                     self.tournament_manager = TournamentManager(self.participants.chosen_participants)
-                    content.add_widget(
-                        TabbedCompetition(
-                            self.tournament_manager
-                        )
-                    )
 
             elif len(self.participants.chosen_participants) < 2:
                 messagebox.showerror("Error", "Check at least two participants")
-            else:
-                messagebox.showerror("Error", "Check up to twelve participants")
+            elif len(self.participants.chosen_participants) > 16:
+                messagebox.showerror("Error", "Check up to sixteen participants")
+
+            content.add_widget(
+                TabbedCompetition(
+                    self.tournament_manager
+                )
+            )
 
         elif item == "Tournament":
             if not self.tournament_manager:
                 messagebox.showerror("Tournament cannot be started. Generate a bracket first")
                 return
             self.tournament_manager.start_the_tournament()
-            content.add_widget(
-                TournamentView()
-            )
+
+            box_layout = BoxLayout(orientation="vertical", spacing=40)
+            box_layout.add_widget(TournamentFight())
+            box_layout.add_widget(NextFightPreview())
+            box_layout.add_widget(BoxLayout())
+
+            content.add_widget(box_layout)
 
 
 
