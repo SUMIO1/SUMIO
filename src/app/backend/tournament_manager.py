@@ -12,8 +12,8 @@ class TournamentManager:
         self.__contestants: pd.DataFrame = chosen_participants
         self.tournament_has_stared = False
         self.tournament_has_finished = False
-        self.__duels_manager_normal: Optional[DuelsManager] = None
-        self.__duels_manager_repechage: Optional[DuelsManager] = None
+        self.duels_manager_normal: Optional[DuelsManager] = None
+        self.duels_manager_repechage: Optional[DuelsManager] = None
 
         # the way to address participants in the tree:
         # b1_3_2 - level 1, bracket 3, position 2
@@ -81,6 +81,8 @@ class TournamentManager:
             return self.__contestants_in_the_normal_tree[key]
         elif key.startswith("r"):
             return self.__contestants_in_the_repechage_tree[key]
+        elif key in self.__contestants_special.keys():
+            return self.__contestants_special[key]
         else:
             raise ValueError(f"Invalid key: {key}")
 
@@ -98,12 +100,12 @@ class TournamentManager:
 
     def start_the_tournament(self):
         self.tournament_has_stared = True
-        self.__duels_manager_normal = DuelsManager(
+        self.duels_manager_normal = DuelsManager(
             self.__contestants_in_the_normal_tree,
             self.__contestants_in_the_repechage_tree,
             self.get_num_of_competitors(),
             False)
-        self.__duels_manager_repechage = DuelsManager(
+        self.duels_manager_repechage = DuelsManager(
             self.__contestants_in_the_normal_tree,
             self.__contestants_in_the_repechage_tree,
             self.get_num_of_competitors(),
@@ -114,56 +116,56 @@ class TournamentManager:
         self.tournament_has_finished = True
 
     def get_next_duel(self) -> Optional[tuple[str, str, str, Optional[str]]]:
-        if self.__duels_manager_normal and self.__duels_manager_normal.has_duels_left_to_fight():
-            return self.__duels_manager_normal.get_next_duel()
+        if self.duels_manager_normal and self.duels_manager_normal.has_duels_left_to_fight():
+            return self.duels_manager_normal.get_next_duel()
 
-        if self.__duels_manager_repechage and self.__duels_manager_repechage.has_duels_left_to_fight():
-            return self.__duels_manager_repechage.get_next_duel()
+        if self.duels_manager_repechage and self.duels_manager_repechage.has_duels_left_to_fight():
+            return self.duels_manager_repechage.get_next_duel()
 
         return None
 
     def peek_next_duel(self) -> Optional[tuple[str, str, str, Optional[str]]]:
-        if self.__duels_manager_normal is None or self.__duels_manager_repechage is None:
+        if self.duels_manager_normal is None or self.duels_manager_repechage is None:
             return None
 
-        duel = self.__duels_manager_normal.peek_next_duel()
+        duel = self.duels_manager_normal.peek_next_duel()
         if duel:
             return duel
 
-        duel = self.__duels_manager_repechage.peek_next_duel()
+        duel = self.duels_manager_repechage.peek_next_duel()
         if duel:
             return duel
 
         return None
 
     def peek_next_next_duel(self):
-        if self.__duels_manager_normal is None or self.__duels_manager_repechage is None:
+        if self.duels_manager_normal is None or self.duels_manager_repechage is None:
             return None
 
-        duel = self.__duels_manager_normal.peek_next_next_duel()
+        duel = self.duels_manager_normal.peek_next_next_duel()
         if duel:
             return duel
 
         # we are on the next to last duel of self.__duels_manager_normal
-        elif self.__duels_manager_normal.current_index + 1 == len(self.__duels_manager_normal.duels):
-            duel = self.__duels_manager_repechage.peek_next_duel()
+        elif self.duels_manager_normal.current_index + 1 == len(self.duels_manager_normal.duels):
+            duel = self.duels_manager_repechage.peek_next_duel()
             return duel
 
         # we are on the last duel of self.__duels_manager_normal
-        elif self.__duels_manager_normal.current_index == len(self.__duels_manager_normal.duels):
-            duel = self.__duels_manager_repechage.peek_next_next_duel()
+        elif self.duels_manager_normal.current_index == len(self.duels_manager_normal.duels):
+            duel = self.duels_manager_repechage.peek_next_next_duel()
             return duel
 
         return None
 
     def has_duels_left_to_fight(self) -> bool:
-        if self.__duels_manager_normal is None or self.__duels_manager_repechage is None:
+        if self.duels_manager_normal is None or self.duels_manager_repechage is None:
             return False
 
         return (
-                self.__duels_manager_normal.has_duels_left_to_fight()
+                self.duels_manager_normal.has_duels_left_to_fight()
                 or
-                self.__duels_manager_repechage.has_duels_left_to_fight()
+                self.duels_manager_repechage.has_duels_left_to_fight()
         )
 
 
