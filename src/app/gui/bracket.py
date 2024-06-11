@@ -189,4 +189,3 @@ class CompetitionBracket(FloatLayout):
             )
         else:
             self.editor.edit_mode = False
-

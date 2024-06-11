@@ -21,4 +21,3 @@ class BackgroundLabel(Label):
         with self.canvas.before:
             Color(rgba=(r, g, b, a))
             self.rect = Rectangle(size=self.size, pos=self.pos)
-
