@@ -14,12 +14,12 @@ class NextFightPreview(BoxLayout):
         second_wrestler_data = tournament_manager.get_contestant_data(second_wrestler_key)
 
         if first_wrestler_data.any():
-            first_wrestler_fullname = f"{first_wrestler_data['surname']} {first_wrestler_data['name']}"
+            first_wrestler_fullname = f"{first_wrestler_data['name']} {first_wrestler_data['surname']}"
         else:
             first_wrestler_fullname = "-"
 
         if second_wrestler_data.any():
-            second_wrestler_fullname = f"{second_wrestler_data['surname']} {second_wrestler_data['name']}"
+            second_wrestler_fullname = f"{second_wrestler_data['name']} {second_wrestler_data['surname']}"
         else:
             second_wrestler_fullname = "-"
 
