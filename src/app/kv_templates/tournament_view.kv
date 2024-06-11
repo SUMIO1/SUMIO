@@ -1,0 +1,73 @@
+<TournamentFight>:
+    orientation: 'vertical'
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    size_hint_y: None
+    height: 700
+
+    Label:
+        text: "Choose a winner"
+        size_hint_y: None
+        height: 100
+        font_size: 60
+        padding: [40, 0, 0, 0]
+        color: 0, 0, 0, 1
+
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: 40
+        id: fight_content
+
+
+<ChoosableWrestler>:
+    orientation: 'vertical'
+    canvas.before:
+        Color:
+            rgba: 0.7, 0.4, 0.5, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+    size_hint_x: None
+    width: 400
+
+    AsyncImage:
+        id: image
+        size_hint: None, None
+        size: 400, 400
+
+    Label:
+        id: wrestler_name
+        text: 'Default text'
+        size_hint_y: None
+        height: 80
+        font_size: 24
+
+    PrettyButton:
+        id: choose_button
+        font_size: 24
+        text: "Design a winner"
+        size_hint_x: 1
+
+
+<NextFightPreview>:
+    orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    size_hint_y: None
+    height: 50
+
+    Label:
+        id: label
+        text: "Default text"
+        markup: True
+        color: 0, 0, 0, 1
+        font_size: 24

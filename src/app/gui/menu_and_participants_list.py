@@ -1,8 +1,7 @@
-from collections import defaultdict
 import logging
 from functools import partial
 from tkinter import messagebox
-from typing import DefaultDict, Any
+from typing import Optional
 
 import pandas as pd
 from kivy.metrics import dp
@@ -18,7 +17,9 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
-from src.app.backend.ParticipantsManager import ParticipantsManager
+from src.app.gui.tournament_view import NextFightPreview, TournamentFight
+from src.app.backend.tournament_manager import TournamentManager
+from src.app.backend.participants_manager import ParticipantsManager
 from src.app.config.constraints import CONSTRAINTS
 from src.app.csv_reader import csv_reader
 from src.app.gui.bracket import TabbedCompetition
@@ -32,7 +33,7 @@ class MainScreen(BoxLayout):
         super(MainScreen, self).__init__(**kwargs)
         self.update_content("Quick Start")
         self.participants = ParticipantsManager()
-        self.labels: DefaultDict[Any, None] = defaultdict(lambda: None)
+        self.tournament_manager: Optional[TournamentManager] = None
 
     def update_content(self, item):
         content = self.ids.content
@@ -40,18 +41,21 @@ class MainScreen(BoxLayout):
         if item == "Quick Start":
             content.add_widget(QuickStart())
         elif item == "Load CSV file":
-            csv_reader.readCSV()
+            result = csv_reader.readCSV()
+            if result:
+                self.update_content("Show participants")
+
         elif item == "Show participants":
             if csv_reader.df is None:
                 messagebox.showerror(
                     "Error", "No data to show. Please load a CSV file."
                 )
                 return
-            if len(self.labels):
-                messagebox.showerror(
-                    "Error", "The tournament that has started has ended."
+            if self.tournament_manager:
+                messagebox.showwarning(
+                    "Tournament interrupted", "The tournament that had started has been interrupted."
                 )
-                self.labels = defaultdict(lambda: None)
+                self.tournament_manager = None
                 self.participants = ParticipantsManager()
 
             show_participants = ShowParticipants(
@@ -62,22 +66,43 @@ class MainScreen(BoxLayout):
             # the method "generate_layout" has to be invoked after "content.add_widget(show_participants)"
             show_participants.generate_layout()
 
+            self.tournament_manager = None
+
         elif item == "Bracket":
-            if 16 >= len(self.participants.chosen_participants) >= 2:
+            if not self.tournament_manager and 16 >= len(self.participants.chosen_participants) >= 2:
                 result = messagebox.askyesno(
                     "Confirmation", "Do you want to generate a bracket?"
                 )
                 if result:
-                    content.add_widget(
-                        TabbedCompetition(
-                            self.participants.chosen_participants, labels=self.labels
-                        )
-                    )
+                    self.tournament_manager = TournamentManager(self.participants.chosen_participants)
 
             elif len(self.participants.chosen_participants) < 2:
                 messagebox.showerror("Error", "Check at least two participants")
-            else:
-                messagebox.showerror("Error", "Check up to twelve participants")
+            elif len(self.participants.chosen_participants) > 16:
+                messagebox.showerror("Error", "Check up to sixteen participants")
+
+            if self.tournament_manager is not None:
+                content.add_widget(
+                    TabbedCompetition(
+                        self.tournament_manager
+                    )
+                )
+
+        elif item == "Tournament":
+            if not self.tournament_manager:
+                messagebox.showerror("Error", "Tournament cannot be started. Generate a bracket first")
+                return
+
+            if not self.tournament_manager.tournament_has_stared:
+                self.tournament_manager.start_the_tournament()
+
+            box_layout = BoxLayout(orientation="vertical", spacing=40)
+            next_fight_preview = NextFightPreview()
+            box_layout.add_widget(TournamentFight(self.tournament_manager, next_fight_preview))
+            box_layout.add_widget(next_fight_preview)
+            box_layout.add_widget(BoxLayout())
+
+            content.add_widget(box_layout)
 
     def init_dataframe(self, df):
         df["age"] = df["date_of_birth"].apply(csv_reader.birthDateToAge)
@@ -205,7 +230,7 @@ class ShowParticipants(ScrollView):
                 Label(
                     text=header,
                     bold=True,
-                    font_size=14,
+                    font_size=22,
                     color=(0.1294, 0.1294, 0.1294, 1),
                 )
             )
@@ -329,7 +354,7 @@ class ShowParticipants(ScrollView):
             layout.add_widget(
                 Label(
                     text=str(participant[label_name]),
-                    font_size=12,
+                    font_size=18,
                     color=(0.1294, 0.1294, 0.1294, 1),
                 )
             )

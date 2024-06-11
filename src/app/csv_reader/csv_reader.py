@@ -71,17 +71,19 @@ def processCSV(df: DataFrame):
     print(df.head())
 
 
-def readCSV():
+def readCSV() -> bool:
     file_path = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
     if not file_path or not file_path.endswith(".csv"):
         messagebox.showerror("Error", "Please select a CSV file.")
-        return
+        return False
     try:
         global df
         df = pd.read_csv(file_path)
         validateCSV(df)
+        return True
     except ValueError as e:
         messagebox.showerror("Error", str(e))
+        return False
 
 
 if __name__ == "__main__":
