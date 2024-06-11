@@ -182,7 +182,7 @@ class CompetitionBracket(FloatLayout):
                     size_hint=(None, None),
                     size=(162, 52),
                     on_touch_down=self.editor.toggle_edit_mode,
-                    pos=(642.0, 840.0),
+                    pos=(410.0, 840.0),
                     bg_color=(.7, .7, .7, 1)
                 )
             )
