@@ -1,4 +1,9 @@
+### CUSTOM IGNORE RULES ###
+
+# JetBrains
 .idea
+
+### DEFAULT IGNORE RULES ###
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -129,3 +134,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+### EXCLUDE RULES ###
+
+# deployment
+!deployment/sumio.spec
