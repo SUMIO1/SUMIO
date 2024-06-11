@@ -134,16 +134,19 @@ class CompetitionBracket(FloatLayout):
         left_bottom_x, left_bottom_y = self.to_window(self.x, self.y)
 
         for key, contestant in labels.items():
-            if not key.startswith("b") or key.startswith("r"):  # skip other keys
+            if not key.startswith("b") and not key.startswith("r"):  # skip other keys
                 continue
             pos = self.positions[key]
 
             if contestant is not None:
-                text = (
-                        contestant["name"]
-                        + "\n"
-                        + contestant["surname"]
-                )
+                if contestant.any():
+                    text = (
+                            contestant["name"]
+                            + "\n"
+                            + contestant["surname"]
+                    )
+                else:
+                    text = "-"
 
                 label = BackgroundLabel(
                     text=text,

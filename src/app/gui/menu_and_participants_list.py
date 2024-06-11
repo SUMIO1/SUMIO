@@ -17,7 +17,8 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
-from app.gui.tournament_view import TournamentView
+from src.app.backend.report_generator import generate_report
+from src.app.gui.tournament_view import NextFightPreview, TournamentFight
 from src.app.backend.tournament_manager import TournamentManager
 from src.app.backend.participants_manager import ParticipantsManager
 from src.app.config.constraints import CONSTRAINTS
@@ -66,34 +67,53 @@ class MainScreen(BoxLayout):
             # the method "generate_layout" has to be invoked after "content.add_widget(show_participants)"
             show_participants.generate_layout()
 
+            self.tournament_manager = None
+
         elif item == "Bracket":
-            if 16 >= len(self.participants.chosen_participants) >= 2:
+            if not self.tournament_manager and 16 >= len(self.participants.chosen_participants) >= 2:
                 result = messagebox.askyesno(
                     "Confirmation", "Do you want to generate a bracket?"
                 )
                 if result:
                     self.tournament_manager = TournamentManager(self.participants.chosen_participants)
-                    content.add_widget(
-                        TabbedCompetition(
-                            self.tournament_manager
-                        )
-                    )
 
             elif len(self.participants.chosen_participants) < 2:
                 messagebox.showerror("Error", "Check at least two participants")
-            else:
-                messagebox.showerror("Error", "Check up to twelve participants")
+            elif len(self.participants.chosen_participants) > 16:
+                messagebox.showerror("Error", "Check up to sixteen participants")
+
+            if self.tournament_manager is not None:
+                content.add_widget(
+                    TabbedCompetition(
+                        self.tournament_manager
+                    )
+                )
 
         elif item == "Tournament":
             if not self.tournament_manager:
-                messagebox.showerror("Tournament cannot be started. Generate a bracket first")
+                messagebox.showerror("Error", "Tournament cannot be started. Generate a bracket first")
                 return
-            self.tournament_manager.start_the_tournament()
-            content.add_widget(
-                TournamentView()
-            )
 
+            if not self.tournament_manager.tournament_has_stared:
+                self.tournament_manager.start_the_tournament()
 
+            box_layout = BoxLayout(orientation="vertical", spacing=40)
+            next_fight_preview = NextFightPreview()
+            box_layout.add_widget(TournamentFight(self.tournament_manager, next_fight_preview))
+            box_layout.add_widget(next_fight_preview)
+            box_layout.add_widget(BoxLayout())
+
+            content.add_widget(box_layout)
+
+        elif item == "Report":
+            if self.tournament_manager is None:
+                messagebox.showerror("Error", "Cannot generate a report. Tournament hasn't been created yet.")
+            elif not self.tournament_manager.tournament_has_stared:
+                messagebox.showerror("Error", "Cannot generate a report. Tournament hasn't started yet.")
+            elif not self.tournament_manager.tournament_has_finished:
+                messagebox.showerror("Error", "Cannot generate a report. Tournament hasn't finished yet.")
+            else:
+                generate_report(self.tournament_manager)
 
     def init_dataframe(self, df):
         df["age"] = df["date_of_birth"].apply(csv_reader.birthDateToAge)
