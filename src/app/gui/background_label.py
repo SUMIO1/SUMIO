@@ -3,10 +3,12 @@ from kivy.uix.label import Label
 
 
 class BackgroundLabel(Label):
+
     def __init__(self, key: str = "", bg_color: tuple[float, ...] = (0, 0, 0, 0), **kwargs):
         super(BackgroundLabel, self).__init__(**kwargs)
         self.bind(pos=self.update_rect, size=self.update_rect)
         self.key = key
+
         with self.canvas.before:
             Color(rgba=bg_color)
             self.rect = Rectangle(size=self.size, pos=self.pos)
@@ -19,3 +21,4 @@ class BackgroundLabel(Label):
         with self.canvas.before:
             Color(rgba=(r, g, b, a))
             self.rect = Rectangle(size=self.size, pos=self.pos)
+

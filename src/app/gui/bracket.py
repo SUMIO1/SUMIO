@@ -48,6 +48,7 @@ class CompetitionBracket(FloatLayout):
         super(CompetitionBracket, self).__init__(**kwargs)
         self.tournament_manager = tournament_manager
         self.editor = BracketEditor(tournament_manager)
+
         competitors_no = tournament_manager.get_num_of_competitors()
 
         self.repechage = repechage
@@ -127,6 +128,7 @@ class CompetitionBracket(FloatLayout):
         self.clear_widgets()
         self.add_widget(self.background_image)
         self.add_edit_button()
+
         labels = self.tournament_manager.get_contestants_tree(self.repechage)
 
         center_x = self.width / 2
@@ -170,7 +172,6 @@ class CompetitionBracket(FloatLayout):
                 left_bottom_x + center_x + pos["x"],
                 left_bottom_y + center_y + pos["y"],
             )
-
             self.add_widget(label)
 
     def add_edit_button(self):
@@ -188,3 +189,4 @@ class CompetitionBracket(FloatLayout):
             )
         else:
             self.editor.edit_mode = False
+
