@@ -6,6 +6,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.tabbedpanel import TabbedPanelItem
 
+from src.app.backend.bracket_editor import BracketEditor
 from src.app.backend.tournament_manager import TournamentManager
 from src.app.gui.background_label import BackgroundLabel
 
@@ -46,6 +47,8 @@ class CompetitionBracket(FloatLayout):
     ):
         super(CompetitionBracket, self).__init__(**kwargs)
         self.tournament_manager = tournament_manager
+        self.editor = BracketEditor(tournament_manager)
+
         competitors_no = tournament_manager.get_num_of_competitors()
 
         self.repechage = repechage
@@ -124,6 +127,8 @@ class CompetitionBracket(FloatLayout):
     def update_labels(self, *args):
         self.clear_widgets()
         self.add_widget(self.background_image)
+        self.add_edit_button()
+
         labels = self.tournament_manager.get_contestants_tree(self.repechage)
 
         center_x = self.width / 2
@@ -147,19 +152,40 @@ class CompetitionBracket(FloatLayout):
 
                 label = BackgroundLabel(
                     text=text,
+                    key=key,
                     color=(0, 0, 0, 1),
                     size_hint=(None, None),
                     size=(162, 52),
+                    on_touch_down=self.editor.on_click
                 )
 
             else:
                 label = BackgroundLabel(
-                    text="-", color=(0, 0, 0, 1), size_hint=(None, None), size=(162, 52)
+                    text="-",
+                    key=key,
+                    color=(0, 0, 0, 1),
+                    size_hint=(None, None),
+                    size=(162, 52)
                 )
 
             label.pos = (
                 left_bottom_x + center_x + pos["x"],
                 left_bottom_y + center_y + pos["y"],
             )
-
             self.add_widget(label)
+
+    def add_edit_button(self):
+        if not self.tournament_manager.tournament_has_stared and self.repechage is False:
+            self.add_widget(
+                BackgroundLabel(
+                    text="EDIT",
+                    color=(0, 0, 0, 1),
+                    size_hint=(None, None),
+                    size=(162, 52),
+                    on_touch_down=self.editor.toggle_edit_mode,
+                    pos=(410.0, 840.0),
+                    bg_color=(.7, .7, .7, 1)
+                )
+            )
+        else:
+            self.editor.edit_mode = False
