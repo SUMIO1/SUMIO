@@ -39,7 +39,9 @@ class TournamentManager:
         )
 
     def swap_contestants(self, key1, key2):
-        self.__contestants_in_the_normal_tree[key1], self.__contestants_in_the_normal_tree[key2] = self.__contestants_in_the_normal_tree[key2], self.__contestants_in_the_normal_tree[key1]
+        temp = self.__contestants_in_the_normal_tree[key1]
+        self.__contestants_in_the_normal_tree[key1] = self.__contestants_in_the_normal_tree[key2]
+        self.__contestants_in_the_normal_tree[key2] = temp
 
     def designate_a_winner(self, fight: tuple[str, str, str, Optional[str]], winner_key: str):
         if winner_key.startswith("b"):

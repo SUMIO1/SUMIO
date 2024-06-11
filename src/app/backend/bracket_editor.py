@@ -36,5 +36,3 @@ class BracketEditor:
                 self.tournament_manager.swap_contestants(self.chosen_label.key, label.key)
                 self.chosen_label.update_color(1, 1, 1, 1)
                 self.chosen_label = None
-
-
