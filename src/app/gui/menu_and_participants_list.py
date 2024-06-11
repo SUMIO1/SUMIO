@@ -17,6 +17,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
+from src.app.backend.report_generator import generate_report
 from src.app.gui.tournament_view import NextFightPreview, TournamentFight
 from src.app.backend.tournament_manager import TournamentManager
 from src.app.backend.participants_manager import ParticipantsManager
@@ -103,6 +104,16 @@ class MainScreen(BoxLayout):
             box_layout.add_widget(BoxLayout())
 
             content.add_widget(box_layout)
+
+        elif item == "Report":
+            if self.tournament_manager is None:
+                messagebox.showerror("Error", "Cannot generate a report. Tournament hasn't been created yet.")
+            elif not self.tournament_manager.tournament_has_stared:
+                messagebox.showerror("Error", "Cannot generate a report. Tournament hasn't started yet.")
+            elif not self.tournament_manager.tournament_has_finished:
+                messagebox.showerror("Error", "Cannot generate a report. Tournament hasn't finished yet.")
+            else:
+                generate_report(self.tournament_manager)
 
     def init_dataframe(self, df):
         df["age"] = df["date_of_birth"].apply(csv_reader.birthDateToAge)
