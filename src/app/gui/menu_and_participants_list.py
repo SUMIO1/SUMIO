@@ -230,7 +230,7 @@ class ShowParticipants(ScrollView):
                 Label(
                     text=header,
                     bold=True,
-                    font_size=14,
+                    font_size=22,
                     color=(0.1294, 0.1294, 0.1294, 1),
                 )
             )
@@ -354,7 +354,7 @@ class ShowParticipants(ScrollView):
             layout.add_widget(
                 Label(
                     text=str(participant[label_name]),
-                    font_size=12,
+                    font_size=18,
                     color=(0.1294, 0.1294, 0.1294, 1),
                 )
             )

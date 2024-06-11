@@ -53,8 +53,9 @@ class TournamentFight(BoxLayout):
 
         self.vs_label = Label(
             text="vs",
-            font_size=40,
-            size_hint=(0.5, 1)
+            font_size=128,
+            size_hint=(0.5, 1),
+            color=(0, 0, 0, 1)
         )
 
         self.set_up_next_fight()
