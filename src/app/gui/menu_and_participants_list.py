@@ -17,7 +17,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
 from kivy.uix.widget import Widget
 
-from app.gui.tournament_view import NextFightPreview, TournamentFight
+from src.app.gui.tournament_view import NextFightPreview, TournamentFight
 from src.app.backend.tournament_manager import TournamentManager
 from src.app.backend.participants_manager import ParticipantsManager
 from src.app.config.constraints import CONSTRAINTS
@@ -81,26 +81,28 @@ class MainScreen(BoxLayout):
             elif len(self.participants.chosen_participants) > 16:
                 messagebox.showerror("Error", "Check up to sixteen participants")
 
-            content.add_widget(
-                TabbedCompetition(
-                    self.tournament_manager
+            if self.tournament_manager is not None:
+                content.add_widget(
+                    TabbedCompetition(
+                        self.tournament_manager
+                    )
                 )
-            )
 
         elif item == "Tournament":
             if not self.tournament_manager:
-                messagebox.showerror("Tournament cannot be started. Generate a bracket first")
+                messagebox.showerror("Error", "Tournament cannot be started. Generate a bracket first")
                 return
-            self.tournament_manager.start_the_tournament()
+
+            if not self.tournament_manager.tournament_has_stared:
+                self.tournament_manager.start_the_tournament()
 
             box_layout = BoxLayout(orientation="vertical", spacing=40)
-            box_layout.add_widget(TournamentFight())
-            box_layout.add_widget(NextFightPreview())
+            next_fight_preview = NextFightPreview()
+            box_layout.add_widget(TournamentFight(self.tournament_manager, next_fight_preview))
+            box_layout.add_widget(next_fight_preview)
             box_layout.add_widget(BoxLayout())
 
             content.add_widget(box_layout)
-
-
 
     def init_dataframe(self, df):
         df["age"] = df["date_of_birth"].apply(csv_reader.birthDateToAge)
